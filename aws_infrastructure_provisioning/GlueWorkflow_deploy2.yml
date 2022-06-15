@@ -1,10 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:                                                                                                       
-# The name of the crawler to be created
-  CrawlerName:  
-    Type: String
-    Default: tweets-ingested-crawler
   DatabaseName:
     Type: String
     Default: tweets-ingested-db
@@ -16,9 +12,7 @@ Parameters:
     Type: String
     Default: poc
     AllowedValues:
-      - "poc"
       - "dev"
-      - "tst"
       - "prod"
   
   Name:
@@ -79,11 +73,11 @@ Resources:
       DatabaseInput:
         Name: !Ref DatabaseName
         Description: "Glue Databases for ingested tweets"
- #Create a crawler to crawl the tweets data on a public S3 bucket
+ #Create a crawler to crawl the tweets data in a s3 bucket
   CrawlerIngestedTweets:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: !Ref CrawlerName
+      Name: !Ref CrawlerIngestedTweets
       Role: !GetAtt RoleProcessingTweets.Arn
       # Just Crawl New Order to limit workload and costs
       RecrawlPolicy: 
@@ -125,6 +119,31 @@ Resources:
         Name: GlueJobGetTweetsEntities
         Role: !Ref RoleProcessingTweets
 
+ #Create a crawler to crawl the processed tweets tables in a s3 bucket
+  CrawlerProcessedTweetsTables:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Ref CrawlerProcessedTweetsTables
+      Role: !GetAtt RoleProcessingTweets.Arn
+      # Just Crawl New Order to limit workload and costs
+      RecrawlPolicy: 
+        RecrawlBehavior: "CRAWL_NEW_FOLDERS_ONLY"
+      #Classifiers: none, use the default classifier
+      Description: AWS Glue crawler to crawl processed tweets tables
+      #Schedule: none, use default run-on-demand
+      DatabaseName: !Ref DatabaseName
+      Targets:
+        S3Targets:
+          # Private S3 bucket with ingested tweet data
+          - Path: "s3://tweets-processed/tweet_entities/"
+      #TablePrefix: !Ref TablePrefixName
+      SchemaChangePolicy:
+        UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
+        DeleteBehavior: "LOG"
+      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
+
+
+
   TriggerCrawlerForIngestedTweets:
     Type: AWS::Glue::Trigger
     Properties:
@@ -151,3 +170,19 @@ Resources:
           - LogicalOperator: EQUALS
             CrawlerName: !Ref CrawlerIngestedTweets
             CrawlState: SUCCEEDED
+
+
+  TriggerCrawlerForProcessedTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerCrawlerForProcessedTweets
+      Type: "CONDITIONAL"
+      Description: After the Glue Job processed the raw Tweets and processed data in a s3 bucket a Crawler is triggered to crawl the process data and to ceate a Athena table for visualization purposes.
+      WorkflowName: !Ref ProcessTweetsWorkflow 											
+      Actions:
+        - CrawlerName: !Ref CrawlerProcessedTweetsTables
+      Predicate:
+        Conditions:
+          - LogicalOperator: EQUALS
+            JobName: !Ref JobProcessingTweets
+            State: SUCCEEDED
