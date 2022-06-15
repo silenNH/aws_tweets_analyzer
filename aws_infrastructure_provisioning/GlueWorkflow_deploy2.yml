@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:                                                                                                       
+# The name of the crawler to be created
+  CrawlerName:  
+    Type: String
+    Default: tweets-ingested-crawler
+  DatabaseName:
+    Type: String
+    Default: tweets-ingested-db
+  TablePrefixName:
+    Type: String
+    Default: rawTweets
+
+  Environment:
+    Type: String
+    Default: poc
+    AllowedValues:
+      - "poc"
+      - "dev"
+      - "tst"
+      - "prod"
+  
+  Name:
+    Type: String
+    Default: TweetsAnalyzer
+
+  SourceBucket:
+    Type: String
+  
+  MetaDataBucket:
+    Type: String
+  
+  ProcessedDataBucket:
+    Type: String
+
+
+Resources: 
+  ProcessTweetsWorkflow:
+    Type: AWS::Glue::Workflow
+    Properties: 
+      Description: The workflows triggers the initial glue crawler for the ingested tweets. After competion a glue job is started to process the tweets. The processed tweets are processed in a glue crawler
+      Name: ProcessTweetsWorkflow
+
+  RoleProcessingTweets:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - arn:aws:iam::aws:policy/AmazonSQSFullAccess
+        - arn:aws:iam::aws:policy/PowerUserAccess
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "glue.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "*"
+                Resource: "*"
+ # Create a database to contain tables created by the crawler
+  DatabaseIngestedTweets:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref DatabaseName
+        Description: "Glue Databases for ingested tweets"
+ #Create a crawler to crawl the tweets data on a public S3 bucket
+  CrawlerIngestedTweets:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Ref CrawlerName
+      Role: !GetAtt RoleProcessingTweets.Arn
+      # Just Crawl New Order to limit workload and costs
+      RecrawlPolicy: 
+        RecrawlBehavior: "CRAWL_NEW_FOLDERS_ONLY"
+      #Classifiers: none, use the default classifier
+      Description: AWS Glue crawler to crawl ingested tweets
+      #Schedule: none, use default run-on-demand
+      DatabaseName: !Ref DatabaseName
+      Targets:
+        S3Targets:
+          # Private S3 bucket with ingested tweet data
+          - Path: "s3://ingested-tweets-nh/dev/"
+      TablePrefix: !Ref TablePrefixName
+      SchemaChangePolicy:
+        UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
+        DeleteBehavior: "LOG"
+      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
+
+
+  JobProcessingTweets:
+      Type: AWS::Glue::Job
+      Properties:
+        MaxRetries: 0
+        GlueVersion: 2.0
+        NumberOfWorkers: 2
+        Timeout: 10
+        ExecutionProperty:
+          MaxConcurrentRuns: 1
+        WorkerType: "Standard"
+        Command:
+          Name: glueetl
+          ScriptLocation: "s3://tweets-meta-data/scripts/get_entity_table_withBookmark.py"
+        DefaultArguments:
+          "--job-bookmark-option": "job-bookmark-enable"
+          '--TempDir': "s3://tweets-meta-data/GlueJobTemp/"
+        ExecutionProperty:
+          MaxConcurrentRuns: 2
+        MaxRetries: 0
+        Name: GlueJobGetTweetsEntities
+        Role: !Ref RoleProcessingTweets
+
+  TriggerCrawlerForIngestedTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerCrawlerForIngestedTweets
+      Type: ON_DEMAND
+      Description: This Trigger triggers the glue crawler for the ingested tweets
+      WorkflowName: !Ref ProcessTweetsWorkflow
+      Actions:
+        - CrawlerName: !Ref CrawlerIngestedTweets
+
+  TriggerJobForProcessingTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerJobForProcessingTweets
+      Type: "CONDITIONAL"
+      Description: After the Crawler CrawlerIngestedTweets is completed the Glue Job
+      WorkflowName: !Ref ProcessTweetsWorkflow 											
+      Actions:
+        - JobName: !Ref JobProcessingTweets
+          Arguments:
+            "--job-bookmark-option": "job-bookmark-enable"
+      Predicate:
+        Conditions:
+          - LogicalOperator: EQUALS
+            CrawlerName: !Ref CrawlerIngestedTweets
+            CrawlState: SUCCEEDED
