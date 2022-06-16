@@ -10,7 +10,7 @@ Parameters:
 
   Environment:
     Type: String
-    Default: poc
+    Default: dev
     AllowedValues:
       - "dev"
       - "prod"
@@ -77,7 +77,7 @@ Resources:
   CrawlerIngestedTweets:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: !Ref CrawlerIngestedTweets
+      Name: CrawlerIngestedTweets
       Role: !GetAtt RoleProcessingTweets.Arn
       # Just Crawl New Order to limit workload and costs
       RecrawlPolicy: 
@@ -89,8 +89,8 @@ Resources:
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
-          - Path: "s3://ingested-tweets-nh/dev/"
-      TablePrefix: !Ref TablePrefixName
+          - Path: "s3://ingested-tweets-nh/dev/timeline/"
+      #TablePrefix: !Ref TablePrefixName
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
         DeleteBehavior: "LOG"
@@ -98,32 +98,32 @@ Resources:
 
 
   JobProcessingTweets:
-      Type: AWS::Glue::Job
-      Properties:
-        MaxRetries: 0
-        GlueVersion: 2.0
-        NumberOfWorkers: 2
-        Timeout: 10
-        ExecutionProperty:
-          MaxConcurrentRuns: 1
-        WorkerType: "Standard"
-        Command:
-          Name: glueetl
-          ScriptLocation: "s3://tweets-meta-data/scripts/get_entity_table_withBookmark.py"
-        DefaultArguments:
-          "--job-bookmark-option": "job-bookmark-enable"
-          '--TempDir': "s3://tweets-meta-data/GlueJobTemp/"
-        ExecutionProperty:
-          MaxConcurrentRuns: 2
-        MaxRetries: 0
-        Name: GlueJobGetTweetsEntities
-        Role: !Ref RoleProcessingTweets
+    Type: AWS::Glue::Job
+    Properties:
+      MaxRetries: 0
+      GlueVersion: 2.0
+      NumberOfWorkers: 2
+      Timeout: 10
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      WorkerType: "Standard"
+      Command:
+        Name: glueetl
+        ScriptLocation: "s3://tweets-meta-data/scripts/get_entity_table_withBookmark.py"
+      DefaultArguments:
+        "--job-bookmark-option": "job-bookmark-enable"
+        '--TempDir': "s3://tweets-meta-data/GlueJobTemp/"
+      ExecutionProperty:
+        MaxConcurrentRuns: 2
+      MaxRetries: 0
+      Name: JobProcessingTweets
+      Role: !Ref RoleProcessingTweets
 
  #Create a crawler to crawl the processed tweets tables in a s3 bucket
   CrawlerProcessedTweetsTables:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: !Ref CrawlerProcessedTweetsTables
+      Name: CrawlerProcessedTweetsTables
       Role: !GetAtt RoleProcessingTweets.Arn
       # Just Crawl New Order to limit workload and costs
       RecrawlPolicy: 
@@ -135,14 +135,19 @@ Resources:
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
-          - Path: "s3://tweets-processed/tweet_entities/"
+          - Path: "s3://tweets-processed/dev/tweet_entities/"
       #TablePrefix: !Ref TablePrefixName
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
         DeleteBehavior: "LOG"
-      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
+      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}},\"Grouping\":{\"TableLevelConfiguration\":4}}"
+      #Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
 
-
+#{Version = 1.0,CrawlerOutput = {Tables = { AddOrUpdateBehavior = "MergeNewColumns"}Partitions = { AddOrUpdateBehavior = "InheritFromTable"}
+#      },
+#      Grouping = { TableLevelConfiguration = 3 }
+#    }
+#"{\"Version\":1.0,\"Grouping\":{\"TableLevelConfiguration\":\"3\"}}"
 
   TriggerCrawlerForIngestedTweets:
     Type: AWS::Glue::Trigger
@@ -158,9 +163,9 @@ Resources:
     Type: AWS::Glue::Trigger
     Properties:
       Name: TriggerJobForProcessingTweets
-      Type: "CONDITIONAL"
+      Type: CONDITIONAL
+      StartOnCreation: True
       Description: After the Crawler CrawlerIngestedTweets is completed the Glue Job
-      WorkflowName: !Ref ProcessTweetsWorkflow 											
       Actions:
         - JobName: !Ref JobProcessingTweets
           Arguments:
@@ -170,15 +175,16 @@ Resources:
           - LogicalOperator: EQUALS
             CrawlerName: !Ref CrawlerIngestedTweets
             CrawlState: SUCCEEDED
+      WorkflowName: !Ref ProcessTweetsWorkflow
 
 
   TriggerCrawlerForProcessedTweets:
     Type: AWS::Glue::Trigger
     Properties:
       Name: TriggerCrawlerForProcessedTweets
-      Type: "CONDITIONAL"
+      Type: CONDITIONAL
+      StartOnCreation: True
       Description: After the Glue Job processed the raw Tweets and processed data in a s3 bucket a Crawler is triggered to crawl the process data and to ceate a Athena table for visualization purposes.
-      WorkflowName: !Ref ProcessTweetsWorkflow 											
       Actions:
         - CrawlerName: !Ref CrawlerProcessedTweetsTables
       Predicate:
@@ -186,3 +192,4 @@ Resources:
           - LogicalOperator: EQUALS
             JobName: !Ref JobProcessingTweets
             State: SUCCEEDED
+      WorkflowName: !Ref ProcessTweetsWorkflow

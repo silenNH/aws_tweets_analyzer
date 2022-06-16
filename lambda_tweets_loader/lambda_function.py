@@ -8,7 +8,7 @@ from util import check_s3folder_exists, create_s3folder, upload_s3, check_startd
 
 def lambda_handler(event, context):
     # TODO implement
-    user_ids=['1233052817390284800','851431642950402048','40129171','332617373','1701930446','37065910','998503348369272832','2541212474','2767778093']
+    user_ids=['1233052817390284800','851431642950402048','40129171','332617373','1701930446','37065910','998503348369272832','2541212474','2767778093','281766494','2215783724','1080799090538172416','714051110']
     max_results=100 #5 up to 100
     tweet_startdate_default='2022-06-07T08:00:00Z'
     environment="dev"
@@ -21,7 +21,7 @@ def lambda_handler(event, context):
     #print(datetime.datetime.utcnow().isoformat())
 
     #Get Last Entry_Key
-    entry_key=check_startdate_in_bookmark(bucket_meta_data, f'{prefix_bookmark_forGlueJob}/bookmark_ForGlueJob',1)
+    #entry_key=check_startdate_in_bookmark(bucket_meta_data, f'{prefix_bookmark_forGlueJob}/bookmark_ForGlueJob',1)
 
     for user_id in user_ids:
         pagination_token=None
@@ -49,13 +49,14 @@ def lambda_handler(event, context):
                           
                     tweets=""
                     for i in range(0,len(data['data'])):
+                        #print(data['data'][i])
                         #created_at_int=int(data['data'][i]["created_at"][0:4]+data['data'][i]["created_at"][5:7]+data['data'][i]["created_at"][8:10]+data['data'][i]["created_at"][11:13]+data['data'][i]["created_at"][14:16] +"00")
                         data['data'][i]["ingested_at_int"]=int(datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"))
                         #data['data'][i]["created_at_int"]=created_at_int
-                        entry_key=entry_key+1
-                        data['data'][i]["entry_key"]=entry_key
+                        #entry_key=entry_key+1
+                        #data['data'][i]["entry_key"]=entry_key
                         line = json.dumps(data['data'][i])
-                        #print(line)
+                        print(line)
                         tweets= tweets + line + '\n'                            
                     upload_s3(tweets, bucket, file)              
                     update_bookmark(bucket_meta_data, f'{prefix_bookmark}/bookmark_{user_id}',f"{datetime.datetime.utcnow().isoformat()[:-7]}Z")
@@ -66,8 +67,8 @@ def lambda_handler(event, context):
                 raise Exception(f"Fetching the latest Tweets from {user_id} failed at {datetime.datetime.utcnow().isoformat()[:-7]}Z")
     
     #Update Bookmark for Pyspark-Glue Job with the the date of the date of the last process_run:
-    update_bookmark(bucket_meta_data, f'{prefix_bookmark_forGlueJob}/bookmark_ForGlueJob',str(entry_key))
-    print(f'The last entry_key is: {entry_key}')   
+    #update_bookmark(bucket_meta_data, f'{prefix_bookmark_forGlueJob}/bookmark_ForGlueJob',str(entry_key))
+    #print(f'The last entry_key is: {entry_key}')   
     return {
             'statusCode': 200,
             'body': json.dumps('Tweets batch load was successful')

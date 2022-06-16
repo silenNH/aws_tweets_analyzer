@@ -22,7 +22,7 @@ job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
 #Ge tweets table
-tweetsddf = glueContext.create_dynamic_frame.from_catalog(database="twitterdb1", table_name="timeline", transformation_ctx = "tweets")
+tweetsddf = glueContext.create_dynamic_frame.from_catalog(database="tweets-ingested-db", table_name="timeline", transformation_ctx = "tweetsddf")
 
 
 #Relationize the table tweets

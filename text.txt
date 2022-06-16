@@ -1,0 +1,16 @@
+  TriggerJobForProcessingTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerJobForProcessingTweets
+      Type: "CONDITIONAL"
+      Description: After the Crawler CrawlerIngestedTweets is completed the Glue Job
+      WorkflowName: !Ref ProcessTweetsWorkflow 											
+      Actions:
+        - JobName: !Ref JobProcessingTweets
+          Arguments:
+            "--job-bookmark-option": "job-bookmark-enable"
+      Predicate:
+        Conditions:
+          - LogicalOperator: EQUALS
+            CrawlerName: !Ref CrawlerIngestedTweets
+            CrawlState: SUCCEEDED
