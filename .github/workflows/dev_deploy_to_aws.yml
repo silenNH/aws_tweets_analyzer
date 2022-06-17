@@ -49,43 +49,43 @@ jobs:
 
   prod_deploy_to_aws:
     if: ${{ github.ref == 'refs/heads/prod' }} 
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-node@v2
-          with:
-            node-version: '12'
-        - name: Configure AWS Credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: eu-central-1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
 
-        - name: Copy Data into prod environment
-          if: ${{ github.ref == 'refs/heads/dev' }}
-          run: |
-            echo "Hello"
-            echo "Copy data to development environment on aws server on branch $GITHUB_REF"
-            ls -la
-            aws s3 sync ./glue_pyspark_job  s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/pyspark_script/
-            cd lambda_tweets_loader
-            zip -r ../TweetLoaderZIP.zip .
-            cd ../ 
-            ls -la
-            aws s3 cp TweetLoaderZIP.zip s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/lambda-source/
+      - name: Copy Data into prod environment
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        run: |
+          echo "Hello"
+          echo "Copy data to development environment on aws server on branch $GITHUB_REF"
+          ls -la
+          aws s3 sync ./glue_pyspark_job  s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/pyspark_script/
+          cd lambda_tweets_loader
+          zip -r ../TweetLoaderZIP.zip .
+          cd ../ 
+          ls -la
+          aws s3 cp TweetLoaderZIP.zip s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/lambda-source/
 
-        - name: Set parameters for prod environment
-          if: ${{ github.ref == 'refs/heads/prod' }}
-          run: |
-            aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
-            #cd user_ids
-            ls -la
-            #cat user_ids.txt
-            #cd ../
-            cat ./user_ids/user_ids.txt
-            user_ids=`cat ./user_ids/user_ids.txt`
-            aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
-            aws ssm put-parameter --name PROD_TWEETS_DATA --value ${{ secrets.PROD_TWEETS_DATA }}  --type "String" --overwrite
-            aws ssm put-parameter --name PROD_TWEETS_META_SOURCE --value ${{ secrets.PROD_TWEETS_META_SOURCE }}  --type "String" --overwrite
-            aws ssm put-parameter --name CURRENT_ENV --value "prod"  --type "String" --overwrite
+      - name: Set parameters for prod environment
+        if: ${{ github.ref == 'refs/heads/prod' }}
+        run: |
+          aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
+          #cd user_ids
+          ls -la
+          #cat user_ids.txt
+          #cd ../
+          cat ./user_ids/user_ids.txt
+          user_ids=`cat ./user_ids/user_ids.txt`
+          aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
+          aws ssm put-parameter --name PROD_TWEETS_DATA --value ${{ secrets.PROD_TWEETS_DATA }}  --type "String" --overwrite
+          aws ssm put-parameter --name PROD_TWEETS_META_SOURCE --value ${{ secrets.PROD_TWEETS_META_SOURCE }}  --type "String" --overwrite
+          aws ssm put-parameter --name CURRENT_ENV --value "prod"  --type "String" --overwrite
