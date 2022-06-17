@@ -1,9 +1,13 @@
 name: deploy_to_aws
-on: push 
+on: 
+  push:
+    branches:
+    - dev
+
 
 
 jobs:
-  Deploy_Configure_Lambda: 
+  Deplay_to_aws: 
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
@@ -17,6 +21,7 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: eu-central-1
         - name: Copy Data
-          if: contains(github.ref, "dev")
+          if: contains(github.ref, dev)
           run: |
+            print("Hello")
 
