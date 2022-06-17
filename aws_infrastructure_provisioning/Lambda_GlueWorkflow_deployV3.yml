@@ -18,10 +18,17 @@ Parameters:
       - "dev"
       - "prod"
 
-  #Bucket: 
-  #  Type: String
+  DataBucket: 
+    Type: String
 
+  MetaBucket:
+    Type: String
 
+  PathIngestCrawler:
+    Type: String
+
+  GlueJobTempPath:
+    Type: String
 
 Mappings: 
   DatabaseNameMap:
@@ -55,8 +62,8 @@ Resources:
   LambdaFunction:
     Properties:
       Code:
-        S3Bucket: tweets-meta-data
-        S3Key: lambda_scripts/TweetLoaderZIP.zip
+        S3Bucket: !Ref MetaBucket
+        S3Key: lambda-source/TweetLoaderZIP.zip
       Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role:
@@ -155,7 +162,7 @@ Resources:
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
-          - Path: "s3://ingested-tweets-nh/dev/timeline/"
+          - Path: !Ref PathIngestCrawler
       #TablePrefix: !Ref TablePrefixName
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
