@@ -36,12 +36,18 @@ Parameters:
   PathGlueJobScript:
     Type: String
 
+  ProdDB:
+    Type: String
+  
+  DevDB:
+    Type: String
+
 Mappings: 
   DatabaseNameMap:
     prod: 
-      database: prod-tweets-db
+      database: !Ref ProdDB #prod-tweets-db
     dev:
-      database: dev-tweets-db
+      database: !Ref DevDB #dev-tweets-db
 
 Resources: 
   LambdaExecutionRole:
@@ -194,6 +200,7 @@ Resources:
       DefaultArguments:
         "--job-bookmark-option": "job-bookmark-enable"
         '--TempDir': !Ref GlueJobTempPath
+        "--DataBase1": !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
       ExecutionProperty:
         MaxConcurrentRuns: 2
       MaxRetries: 0

@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         raise
     tweet_startdate_default=ssm.get_parameter(Name='TWEET_STARTDATE_DEFAULT', WithDecryption=False)['Parameter']['Value']                            #Example '2022-06-12T08:00:00Z'
     user_ids= ssm.get_parameter(Name='UserIDs', WithDecryption=False)['Parameter']['Value']  # Examples: ['1233052817390284800','851431642950402048','40129171','332617373','1701930446','37065910','998503348369272832','2541212474','2767778093','281766494','2215783724','1080799090538172416','714051110','973924410771075072','3381355079']
-
+    user_ids=user_ids.split(",")
 
     prefix=f'{environment}/timeline/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}'
     current_folder=f'{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'

@@ -13,15 +13,15 @@ from pyspark.sql.functions import to_timestamp
 import boto3
 import datetime
 
-print("Get Entities & Sentiment Script is starting!")
+print("Get Entities Script is starting!")
 
-#Get Argumente for bookmarking
-args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1'])
-database_env=args['DataBase1']
 #Set current bucket and env from parameter store
 ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
 environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
 bucket=ssm.get_parameter(Name='current_tweets_processed_bucket', WithDecryption=False)['Parameter']['Value']
+
+#Get Argumente for bookmarking
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
 #Create glueContext
 glueContext = GlueContext(SparkContext.getOrCreate())
@@ -31,7 +31,7 @@ job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
 #Get tweets table
-tweetsddf = glueContext.create_dynamic_frame.from_catalog(database=database_env, table_name="timeline", transformation_ctx = "tweetsddf")
+tweetsddf = glueContext.create_dynamic_frame.from_catalog(database="tweets-ingested-db", table_name="timeline", transformation_ctx = "tweetsddf")
 
 
 #Relationize the table tweets
