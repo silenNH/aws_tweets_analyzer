@@ -188,7 +188,7 @@ Resources:
       WorkerType: "Standard"
       Command:
         Name: glueetl
-        ScriptLocation: !Ref PathGlueJobScript #"s3://tweets-meta-data/scripts/get_entities_sentiment.py"
+        ScriptLocation: !Ref PathGlueJobScript  #"s3://tweets-meta-data/scripts/get_entities_sentiment.py"
       DefaultArguments:
         "--job-bookmark-option": "job-bookmark-enable"
         '--TempDir': !Ref GlueJobTempPath
