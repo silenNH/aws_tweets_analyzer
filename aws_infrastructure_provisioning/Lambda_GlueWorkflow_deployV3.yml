@@ -149,6 +149,7 @@ Resources:
  # Create a database to contain tables created by the crawler
   DatabaseIngestedTweets:
     Type: AWS::Glue::Database
+    DeletionPolicy: Retain
     Properties:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:

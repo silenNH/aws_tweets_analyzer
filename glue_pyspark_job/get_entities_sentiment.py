@@ -20,6 +20,11 @@ args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1','bucket','env'])
 database_env=args['DataBase1']
 bucket=args['DataBase1']
 environment=args['env']
+
+print(bucket)
+print(database_env)
+print(environment)
+
 #Set current bucket and env from parameter store
 #ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
 #environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
