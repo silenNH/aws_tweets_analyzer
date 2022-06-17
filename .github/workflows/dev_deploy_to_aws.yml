@@ -1,4 +1,4 @@
-name: deploy_to_aws
+name: dev_deploy_to_aws
 on: 
   push:
     branches:
@@ -7,7 +7,7 @@ on:
 
 
 jobs:
-  Deplay_to_aws: 
+  Deploy_to_aws: 
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
