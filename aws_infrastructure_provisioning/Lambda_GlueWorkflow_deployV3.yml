@@ -27,8 +27,14 @@ Parameters:
   PathIngestCrawler:
     Type: String
 
-  #GlueJobTempPath:
-  #  Type: String
+  GlueJobTempPath:
+    Type: String
+
+  PathProcessedTweets:
+    Type: String
+
+  PathGlueJobScript:
+    Type: String
 
 Mappings: 
   DatabaseNameMap:
@@ -182,10 +188,10 @@ Resources:
       WorkerType: "Standard"
       Command:
         Name: glueetl
-        ScriptLocation: "s3://tweets-meta-data/scripts/get_entities_sentiment.py"
+        ScriptLocation: !Ref PathGlueJobScript #"s3://tweets-meta-data/scripts/get_entities_sentiment.py"
       DefaultArguments:
         "--job-bookmark-option": "job-bookmark-enable"
-        '--TempDir': "s3://tweets-meta-data/GlueJobTemp/"
+        '--TempDir': !Ref GlueJobTempPath
       ExecutionProperty:
         MaxConcurrentRuns: 2
       MaxRetries: 0
@@ -208,7 +214,7 @@ Resources:
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
-          - Path: "s3://tweets-processed/dev/tweet_entities/"
+          - Path: !Ref PathProcessedTweets 
       #TablePrefix: !Ref TablePrefixName
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"

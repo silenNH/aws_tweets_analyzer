@@ -119,12 +119,7 @@ jobs:
         with:
           name: dev-tweet-analyzer-stack
           template: aws_infrastructure_provisioning/Lambda_GlueWorkflow_deployV3.yml
-          parameter-overrides: "Environmentval=dev,DataBucket=${{ secrets.DEV_TWEETS_DATA }},MetaBucket=${{ secrets.DEV_TWEETS_SOURCE_META }},PathIngestCrawler=s3://${{ secrets.DEV_TWEETS_DATA }}/dev/timeline/"
-
-  #GlueJobTempPath:
-  #  Type: String
-
-  #  "s3://tweets-meta-data/GlueJobTemp/"
+          parameter-overrides: "Environmentval=dev,DataBucket=${{ secrets.DEV_TWEETS_DATA }},MetaBucket=${{ secrets.DEV_TWEETS_SOURCE_META }},PathIngestCrawler=s3://${{ secrets.DEV_TWEETS_DATA }}/dev/timeline/,GlueJobTempPath=s3://${{ secrets.DEV_TWEETS_SOURCE_META }}/GlueJobTemp/, PathProcessedTweets=s3://${{ secrets.DEV_TWEETS_DATA }}/dev/tweet_entities/,PathGlueJobScript=s3://${{ secrets.DEV_TWEETS_SOURCE_META }}/pyspark_script/get_entities_sentiment.py"
 
   prod_deploy_cloudformation_template:
     if: ${{ github.ref == 'refs/heads/prod' }}
@@ -145,4 +140,4 @@ jobs:
         with:
           name: prod-tweet-analyzer-stack
           template: aws_infrastructure_provisioning/Lambda_GlueWorkflow_deployV3.yml
-          parameter-overrides: "Environmentval=prod,DataBucket=${{ secrets.PROD_TWEETS_DATA }},MetaBucket=${{ secrets.PROD_TWEETS_META_SOURCE }},PathIngestCrawler=s3://${{ secrets.PROD_TWEETS_DATA }}/prod/timeline/"
+          parameter-overrides: "Environmentval=prod,DataBucket=${{ secrets.PROD_TWEETS_DATA }},MetaBucket=${{ secrets.PROD_TWEETS_META_SOURCE }},PathIngestCrawler=s3://${{ secrets.PROD_TWEETS_DATA }}/prod/timeline/,GlueJobTempPath=s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/GlueJobTemp/, PathProcessedTweets=s3://${{ secrets.PROD_TWEETS_DATA }}/prod/tweet_entities/,PathGlueJobScript=s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/pyspark_script/get_entities_sentiment.py"
