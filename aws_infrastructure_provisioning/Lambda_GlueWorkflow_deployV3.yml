@@ -1,0 +1,257 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  BEARERTOKEN:
+    Description: WebServer EC2 instance type
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: BEARERTOKEN                                                                                                       
+  DatabaseName:
+    Type: String
+    Default: tweets-ingested-db
+  TablePrefixName:
+    Type: String
+    Default: rawTweets
+
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - "dev"
+      - "prod"
+  
+  Name:
+    Type: String
+    Default: TweetsAnalyzer
+
+  SourceBucket:
+    Type: String
+  
+  MetaDataBucket:
+    Type: String
+  
+  ProcessedDataBucket:
+    Type: String
+
+
+Resources: 
+  LambdaExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: "/"
+      Policies:
+      - PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: s3:*
+            Effect: Allow
+            Resource: "*"
+        PolicyName: root
+    Type: AWS::IAM::Role
+  LambdaFunction:
+    Properties:
+      Code:
+        S3Bucket: tweets-meta-data
+        S3Key: lambda_scripts/TweetLoaderZIP.zip
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Runtime: python3.7
+      Timeout: 60
+      Environment: 
+        Variables:
+          BEARERTOKEN: 
+            Ref: BEARERTOKEN
+    Type: AWS::Lambda::Function
+  LambdaFunctionSchedule:
+    Properties:
+      ScheduleExpression: cron(48 0/1 * * ? *)
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+        Id: '1'
+    Type: AWS::Events::Rule
+  LambdaFunctionCwPermission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - LambdaFunction
+        - Arn
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - LambdaFunctionSchedule
+        - Arn
+    Type: AWS::Lambda::Permission
+
+  ProcessTweetsWorkflow:
+    Type: AWS::Glue::Workflow
+    Properties: 
+      Description: The workflows triggers the initial glue crawler for the ingested tweets. After competion a glue job is started to process the tweets. The processed tweets are processed in a glue crawler
+      Name: ProcessTweetsWorkflow
+
+  RoleProcessingTweets:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - arn:aws:iam::aws:policy/AmazonSQSFullAccess
+        - arn:aws:iam::aws:policy/PowerUserAccess
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "glue.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "*"
+                Resource: "*"
+ # Create a database to contain tables created by the crawler
+  DatabaseIngestedTweets:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref DatabaseName
+        Description: "Glue Databases for ingested tweets"
+ #Create a crawler to crawl the tweets data in a s3 bucket
+  CrawlerIngestedTweets:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: CrawlerIngestedTweets
+      Role: !GetAtt RoleProcessingTweets.Arn
+      # Just Crawl New Order to limit workload and costs
+      RecrawlPolicy: 
+        RecrawlBehavior: "CRAWL_NEW_FOLDERS_ONLY"
+      #Classifiers: none, use the default classifier
+      Description: AWS Glue crawler to crawl ingested tweets
+      #Schedule: none, use default run-on-demand
+      DatabaseName: !Ref DatabaseName
+      Targets:
+        S3Targets:
+          # Private S3 bucket with ingested tweet data
+          - Path: "s3://ingested-tweets-nh/dev/timeline/"
+      #TablePrefix: !Ref TablePrefixName
+      SchemaChangePolicy:
+        UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
+        DeleteBehavior: "LOG"
+      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
+
+
+  JobProcessingTweets:
+    Type: AWS::Glue::Job
+    Properties:
+      MaxRetries: 0
+      GlueVersion: 2.0
+      NumberOfWorkers: 2
+      Timeout: 10
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      WorkerType: "Standard"
+      Command:
+        Name: glueetl
+        ScriptLocation: "s3://tweets-meta-data/scripts/get_entities_sentiment.py"
+      DefaultArguments:
+        "--job-bookmark-option": "job-bookmark-enable"
+        '--TempDir': "s3://tweets-meta-data/GlueJobTemp/"
+      ExecutionProperty:
+        MaxConcurrentRuns: 2
+      MaxRetries: 0
+      Name: JobProcessingTweets
+      Role: !Ref RoleProcessingTweets
+
+ #Create a crawler to crawl the processed tweets tables in a s3 bucket
+  CrawlerProcessedTweetsTables:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: CrawlerProcessedTweetsTables
+      Role: !GetAtt RoleProcessingTweets.Arn
+      # Just Crawl New Order to limit workload and costs
+      RecrawlPolicy: 
+        RecrawlBehavior: "CRAWL_NEW_FOLDERS_ONLY"
+      #Classifiers: none, use the default classifier
+      Description: AWS Glue crawler to crawl processed tweets tables
+      #Schedule: none, use default run-on-demand
+      DatabaseName: !Ref DatabaseName
+      Targets:
+        S3Targets:
+          # Private S3 bucket with ingested tweet data
+          - Path: "s3://tweets-processed/dev/tweet_entities/"
+      #TablePrefix: !Ref TablePrefixName
+      SchemaChangePolicy:
+        UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
+        DeleteBehavior: "LOG"
+      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}},\"Grouping\":{\"TableLevelConfiguration\":4}}"
+
+  TriggerCrawlerForIngestedTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerCrawlerForIngestedTweets
+      Type: SCHEDULED
+      Schedule: "cron(52 0/1 * * ? *)"
+      StartOnCreation: true
+      Description: This Trigger triggers the glue crawler for the ingested tweets
+      WorkflowName: !Ref ProcessTweetsWorkflow
+      Actions:
+        - CrawlerName: !Ref CrawlerIngestedTweets
+
+  TriggerJobForProcessingTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerJobForProcessingTweets
+      Type: CONDITIONAL
+      StartOnCreation: True
+      Description: After the Crawler CrawlerIngestedTweets is completed the Glue Job
+      Actions:
+        - JobName: !Ref JobProcessingTweets
+          Arguments:
+            "--job-bookmark-option": "job-bookmark-enable"
+      Predicate:
+        Conditions:
+          - LogicalOperator: EQUALS
+            CrawlerName: !Ref CrawlerIngestedTweets
+            CrawlState: SUCCEEDED
+      WorkflowName: !Ref ProcessTweetsWorkflow
+
+
+  TriggerCrawlerForProcessedTweets:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: TriggerCrawlerForProcessedTweets
+      Type: CONDITIONAL
+      StartOnCreation: True
+      Description: After the Glue Job processed the raw Tweets and processed data in a s3 bucket a Crawler is triggered to crawl the process data and to ceate a Athena table for visualization purposes.
+      Actions:
+        - CrawlerName: !Ref CrawlerProcessedTweetsTables
+      Predicate:
+        Conditions:
+          - LogicalOperator: EQUALS
+            JobName: !Ref JobProcessingTweets
+            State: SUCCEEDED
+      WorkflowName: !Ref ProcessTweetsWorkflow

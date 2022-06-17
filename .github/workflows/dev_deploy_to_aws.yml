@@ -96,3 +96,22 @@ jobs:
           aws ssm put-parameter --name PROD_TWEETS_DATA --value ${{ secrets.PROD_TWEETS_DATA }}  --type "String" --overwrite
           aws ssm put-parameter --name PROD_TWEETS_META_SOURCE --value ${{ secrets.PROD_TWEETS_META_SOURCE }}  --type "String" --overwrite
           aws ssm put-parameter --name CURRENT_ENV --value "prod"  --type "String" --overwrite
+
+  deploy_cloudformation_template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+      - name: Deploy to AWS CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: tweet-analyzer-stack
+          template: aws_infrastructure_provisioning/test.yaml
