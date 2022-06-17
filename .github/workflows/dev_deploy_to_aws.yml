@@ -24,7 +24,7 @@ jobs:
         - name: Copy Data
           run: |
             echo "Hello"
-            echo "Deploying to production server on branch $GITHUB_REF"
+            echo "Copy data to development environment on aws server on branch $GITHUB_REF"
             ls -la
-            aws sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
+            aws s3 sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
 
