@@ -30,4 +30,5 @@ jobs:
             cd lambda_tweets_loader
             zip -r ../TweetLoaderZIP.zip .
             cd ../ 
-            aws s3 sync TweetLoaderZIP.zip s3://dev-tweets-source-meta/lambda-source/
+            ls -la
+            aws s3 sync ./TweetLoaderZIP.zip s3://dev-tweets-source-meta/lambda-source/
