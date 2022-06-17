@@ -230,7 +230,7 @@ Resources:
     Properties:
       Name: TriggerCrawlerForIngestedTweets
       Type: SCHEDULED
-      Schedule: "cron(8 0/1 * * ? *)"
+      Schedule: "cron(10 0/1 * * ? *)"
       StartOnCreation: true
       Description: This Trigger triggers the glue crawler for the ingested tweets
       WorkflowName: !Ref ProcessTweetsWorkflow
