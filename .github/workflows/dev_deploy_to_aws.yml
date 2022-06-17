@@ -118,7 +118,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: dev-tweet-analyzer-stack
-          template: aws_infrastructure_provisioning/test.yaml
+          template: aws_infrastructure_provisioning/Lambda_GlueWorkflow_deployV3.yml
 
   prod_deploy_cloudformation_template:
     if: ${{ github.ref == 'refs/heads/prod' }}
