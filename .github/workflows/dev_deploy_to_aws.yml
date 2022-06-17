@@ -24,4 +24,5 @@ jobs:
           #if: contains(github.ref, dev)
           run: |
             print("Hello")
+            print("This is a test")
 
