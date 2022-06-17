@@ -43,6 +43,5 @@ jobs:
             cat ./user_ids/user_ids.txt
             user_ids=`cat ./user_ids/user_ids.txt`
             aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
-            ${{ secrets.DEV_TWEETS_DATA }}
             aws ssm put-parameter --name DEV_TWEETS_DATA --value ${{ secrets.DEV_TWEETS_DATA }}  --type "String" --overwrite
             aws ssm put-parameter --name DEV_TWEETS_SOURCE_META --value ${{ secrets.DEV_TWEETS_SOURCE_META }}  --type "String" --overwrite
