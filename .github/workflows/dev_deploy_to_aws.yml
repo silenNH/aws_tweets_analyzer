@@ -55,6 +55,7 @@ jobs:
           aws ssm put-parameter --name DEV_TWEETS_SOURCE_META --value ${{ secrets.DEV_TWEETS_SOURCE_META }}  --type "String" --overwrite
           aws ssm put-parameter --name CURRENT_ENV --value "dev"  --type "String" --overwrite
 
+
   prod_deploy_to_aws:
     if: ${{ github.ref == 'refs/heads/prod' }} 
     runs-on: ubuntu-latest
