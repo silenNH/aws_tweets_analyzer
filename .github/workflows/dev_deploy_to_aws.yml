@@ -27,7 +27,7 @@ jobs:
             echo "Copy data to development environment on aws server on branch $GITHUB_REF"
             ls -la
             aws s3 sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
-            cd LambdaFunction
+            cd lambda_tweets_loader
             zip -r ../TweetLoaderZIP.zip .
             cd ../ 
             aws s3 sync TweetLoaderZIP.zip s3://dev-tweets-source-meta/lambda-source/
