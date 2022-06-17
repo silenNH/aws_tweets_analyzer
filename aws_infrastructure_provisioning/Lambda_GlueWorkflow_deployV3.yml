@@ -17,7 +17,7 @@ Parameters:
     AllowedValues:
       - "dev"
       - "prod"
-  
+
 Resources: 
   LambdaExecutionRole:
     Properties:
