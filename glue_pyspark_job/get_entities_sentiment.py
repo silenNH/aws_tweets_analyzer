@@ -18,12 +18,9 @@ print("Get Entities & Sentiment Script is starting!")
 #Get Argumente for bookmarking
 args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1','bucket','env'])
 database_env=args['DataBase1']
-bucket=args['DataBase1']
+bucket=args['bucket']
 environment=args['env']
 
-print(bucket)
-print(database_env)
-print(environment)
 
 #Set current bucket and env from parameter store
 #ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
@@ -168,18 +165,20 @@ def get_sentiment(text,lang):
 get_sentiment_udf=udf(get_sentiment, StringType())  
 
 tweets_sentiment=tweetsddf.toDF()
-tweets_sentiment=tweets_sentiment.drop("partition_0","partition_1","partition_2","partition_3","partition_4","entities","ingested_at_int")
-tweets_sentiment=tweets_sentiment.withColumn("sentiment", get_sentiment_udf(F.col("text"),F.col("lang")))
-tweets_sentiment=tweets_sentiment.withColumn("created_at_new",to_timestamp("created_at"))
-tweets_sentiment=tweets_sentiment.drop("created_at")
-#Save the resulting tweets_sentiment with sentiment S3: 
-entity_type='tweets_sent'
-prefix=f'{environment}/tweet_entities/{entity_type}/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}/{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'
-s3_bucket=f's3://{bucket}/{prefix}/'
-tweets_sentiment.coalesce(1).write.format('json').save(s3_bucket)
+if tweets_sentiment.count() > 0:
+    tweets_sentiment=tweets_sentiment.drop("partition_0","partition_1","partition_2","partition_3","partition_4","entities","ingested_at_int")
+    tweets_sentiment=tweets_sentiment.withColumn("sentiment", get_sentiment_udf(F.col("text"),F.col("lang")))
+    tweets_sentiment=tweets_sentiment.withColumn("created_at_new",to_timestamp("created_at"))
+    tweets_sentiment=tweets_sentiment.drop("created_at")
+    #Save the resulting tweets_sentiment with sentiment S3: 
+    entity_type='tweets_sent'
+    prefix=f'{environment}/tweet_entities/{entity_type}/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}/{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'
+    s3_bucket=f's3://{bucket}/{prefix}/'
+    tweets_sentiment.coalesce(1).write.format('json').save(s3_bucket)
 #tweets_sentiment.write.mode('append').json(s3_bucket)
-
+else:
+    pass
 #Update Bookmark: 
 job.commit()
 
-print("The Get-Entities-Script is completed!")
+print("The Get-Entities-Sentiment-Script is completed!")
