@@ -18,6 +18,18 @@ Parameters:
       - "dev"
       - "prod"
 
+  #Bucket: 
+  #  Type: String
+
+
+
+Mappings: 
+  DatabaseNameMap:
+    prod: 
+      database: prod-tweets-db
+    dev:
+      database: dev-tweets-db
+
 Resources: 
   LambdaExecutionRole:
     Properties:
@@ -62,7 +74,7 @@ Resources:
     Type: AWS::Lambda::Function
   LambdaFunctionSchedule:
     Properties:
-      ScheduleExpression: cron(48 0/1 * * ? *)
+      ScheduleExpression: cron(* 0/10 * * ? *)
       Targets:
       - Arn:
           Fn::GetAtt:
@@ -125,7 +137,7 @@ Resources:
     Properties:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
-        Name: !Ref DatabaseName
+        Name: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
         Description: "Glue Databases for ingested tweets"
  #Create a crawler to crawl the tweets data in a s3 bucket
   CrawlerIngestedTweets:
@@ -139,7 +151,7 @@ Resources:
       #Classifiers: none, use the default classifier
       Description: AWS Glue crawler to crawl ingested tweets
       #Schedule: none, use default run-on-demand
-      DatabaseName: !Ref DatabaseName
+      DatabaseName: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
@@ -185,7 +197,7 @@ Resources:
       #Classifiers: none, use the default classifier
       Description: AWS Glue crawler to crawl processed tweets tables
       #Schedule: none, use default run-on-demand
-      DatabaseName: !Ref DatabaseName
+      DatabaseName: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
@@ -201,7 +213,7 @@ Resources:
     Properties:
       Name: TriggerCrawlerForIngestedTweets
       Type: SCHEDULED
-      Schedule: "cron(52 0/1 * * ? *)"
+      Schedule: "cron(* 0/10 * * ? *)"
       StartOnCreation: true
       Description: This Trigger triggers the glue crawler for the ingested tweets
       WorkflowName: !Ref ProcessTweetsWorkflow

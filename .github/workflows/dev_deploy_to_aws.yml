@@ -119,6 +119,7 @@ jobs:
         with:
           name: dev-tweet-analyzer-stack
           template: aws_infrastructure_provisioning/Lambda_GlueWorkflow_deployV3.yml
+          parameter-overrides: "Environmentval=dev"
 
   prod_deploy_cloudformation_template:
     if: ${{ github.ref == 'refs/heads/prod' }}
@@ -139,3 +140,4 @@ jobs:
         with:
           name: prod-tweet-analyzer-stack
           template: aws_infrastructure_provisioning/Lambda_GlueWorkflow_deployV3.yml
+          parameter-overrides: "Environmentval=prod"
