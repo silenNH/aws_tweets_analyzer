@@ -23,7 +23,7 @@ jobs:
         - name: Copy Data
           run: |
             echo "Hello"
-            echo ${{ github.head_ref }}
+            echo contains('Hello world', 'llo')
             ls -la
             aws sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
 
