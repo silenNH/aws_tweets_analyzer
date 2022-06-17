@@ -183,7 +183,6 @@ Resources:
         DeleteBehavior: "LOG"
       Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
 
-
   JobProcessingTweets:
     Type: AWS::Glue::Job
     Properties:
