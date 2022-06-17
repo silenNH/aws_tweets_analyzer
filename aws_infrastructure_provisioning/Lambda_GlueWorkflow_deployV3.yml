@@ -46,6 +46,8 @@ Mappings:
 Resources: 
   LambdaExecutionRole:
     Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
       AssumeRolePolicyDocument:
         Statement:
         - Action:
@@ -67,8 +69,6 @@ Resources:
     Type: AWS::IAM::Role
   LambdaFunction:
     Properties:
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
       Code:
         S3Bucket: !Ref MetaBucket
         S3Key: lambda-source/TweetLoaderZIP.zip
@@ -89,7 +89,7 @@ Resources:
     Type: AWS::Lambda::Function
   LambdaFunctionSchedule:
     Properties:
-      ScheduleExpression: cron(45 0/1 * * ? *)
+      ScheduleExpression: cron(55 0/1 * * ? *)
       Targets:
       - Arn:
           Fn::GetAtt:
@@ -228,7 +228,7 @@ Resources:
     Properties:
       Name: TriggerCrawlerForIngestedTweets
       Type: SCHEDULED
-      Schedule: "cron(50 0/1 * * ? *)"
+      Schedule: "cron(58 0/1 * * ? *)"
       StartOnCreation: true
       Description: This Trigger triggers the glue crawler for the ingested tweets
       WorkflowName: !Ref ProcessTweetsWorkflow
