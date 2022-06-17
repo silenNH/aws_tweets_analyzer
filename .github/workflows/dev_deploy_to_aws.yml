@@ -22,6 +22,5 @@ jobs:
             aws-region: eu-central-1
         - name: Copy Data
           run: |
-            print("Hello")
-            print("This is a test")
+            echo "Hello"
 
