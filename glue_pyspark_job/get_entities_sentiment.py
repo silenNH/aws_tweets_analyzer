@@ -16,7 +16,7 @@ import datetime
 print("Get Entities & Sentiment Script is starting!")
 
 #Get Argumente for bookmarking
-args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1'],['bucket'],['env'])
+args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1','bucket','env'])
 database_env=args['DataBase1']
 bucket=args['DataBase1']
 environment=args['env']
