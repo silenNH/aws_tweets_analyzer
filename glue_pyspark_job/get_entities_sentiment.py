@@ -16,12 +16,14 @@ import datetime
 print("Get Entities & Sentiment Script is starting!")
 
 #Get Argumente for bookmarking
-args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1'])
+args = getResolvedOptions(sys.argv, ['JOB_NAME','DataBase1'],['bucket'],['env'])
 database_env=args['DataBase1']
+bucket=args['DataBase1']
+environment=args['env']
 #Set current bucket and env from parameter store
-ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
-environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
-bucket=ssm.get_parameter(Name='current_tweets_processed_bucket', WithDecryption=False)['Parameter']['Value']
+#ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
+#environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
+
 
 #Create glueContext
 glueContext = GlueContext(SparkContext.getOrCreate())

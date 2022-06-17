@@ -194,6 +194,8 @@ Resources:
         "--job-bookmark-option": "job-bookmark-enable"
         '--TempDir': !Ref GlueJobTempPath
         "--DataBase1": !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
+        "--bucket": !Ref DataBucket
+        "--env": !Ref Environmentval
       ExecutionProperty:
         MaxConcurrentRuns: 2
       MaxRetries: 0
