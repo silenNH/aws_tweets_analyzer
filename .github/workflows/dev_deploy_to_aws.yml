@@ -21,7 +21,6 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: eu-central-1
         - name: Copy Data
-          #if: contains(github.ref, dev)
           run: |
             print("Hello")
             print("This is a test")
