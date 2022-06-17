@@ -10,6 +10,12 @@ def lambda_handler(event, context):
     # TODO implement
     user_ids=['1233052817390284800','851431642950402048','40129171','332617373','1701930446','37065910','998503348369272832','2541212474','2767778093','281766494','2215783724','1080799090538172416','714051110','973924410771075072','3381355079']
     max_results=100 #5 up to 100
+    
+    ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
+    environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
+    bucket=ssm.get_parameter(Name='current_tweets_processed_bucket', WithDecryption=False)['Parameter']['Value']
+
+    
     tweet_startdate_default='2022-06-07T08:00:00Z'
     environment="dev"
     bucket="ingested-tweets-nh"
