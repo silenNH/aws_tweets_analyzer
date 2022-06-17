@@ -27,8 +27,8 @@ Parameters:
   PathIngestCrawler:
     Type: String
 
-  GlueJobTempPath:
-    Type: String
+  #GlueJobTempPath:
+  #  Type: String
 
 Mappings: 
   DatabaseNameMap:
