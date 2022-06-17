@@ -4,22 +4,29 @@ import os
 import datetime
 from os.path import exists
 from util import check_s3folder_exists, create_s3folder, upload_s3, check_startdate_in_bookmark, update_bookmark
-#from pprint import pprint
+import boto3
 
 def lambda_handler(event, context):
     # TODO implement
-    user_ids=['1233052817390284800','851431642950402048','40129171','332617373','1701930446','37065910','998503348369272832','2541212474','2767778093','281766494','2215783724','1080799090538172416','714051110','973924410771075072','3381355079']
     max_results=100 #5 up to 100
     
+    #Get Environment Variable
+    environment = os.environ.get("ENVIRONMENTVAL")
+    #Get access to the AWS Parameter Store
     ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
-    environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
-    bucket=ssm.get_parameter(Name='current_tweets_processed_bucket', WithDecryption=False)['Parameter']['Value']
+    #Get Env Variables from the AWS Parameter Store
+    if environment =="dev":
+        bucket=ssm.get_parameter(Name='DEV_TWEETS_DATA', WithDecryption=False)['Parameter']['Value']
+        bucket_meta_data=ssm.get_parameter(Name='DEV_TWEETS_SOURCE_META', WithDecryption=False)['Parameter']['Value']
+    elif environment =="prod":
+        bucket=ssm.get_parameter(Name='PROD_TWEETS_DATA', WithDecryption=False)['Parameter']['Value']
+        bucket_meta_data=ssm.get_parameter(Name='PROD_TWEETS_DATA', WithDecryption=False)['Parameter']['Value']
+    else: 
+        raise
+    tweet_startdate_default=ssm.get_parameter(Name='TWEET_STARTDATE_DEFAULT', WithDecryption=False)['Parameter']['Value']                            #Example '2022-06-12T08:00:00Z'
+    user_ids= ssm.get_parameter(Name='UserIDs', WithDecryption=False)['Parameter']['Value']  # Examples: ['1233052817390284800','851431642950402048','40129171','332617373','1701930446','37065910','998503348369272832','2541212474','2767778093','281766494','2215783724','1080799090538172416','714051110','973924410771075072','3381355079']
 
-    
-    tweet_startdate_default='2022-06-07T08:00:00Z'
-    environment="dev"
-    bucket="ingested-tweets-nh"
-    bucket_meta_data="tweets-meta-data"
+
     prefix=f'{environment}/timeline/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}'
     current_folder=f'{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'
     prefix_bookmark=f'{environment}/meta/tweets_batchload_bookmarks'
