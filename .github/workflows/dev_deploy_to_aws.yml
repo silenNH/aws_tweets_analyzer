@@ -23,4 +23,5 @@ jobs:
         - name: Copy Data
           run: |
             echo "Hello"
+            ls -la
 
