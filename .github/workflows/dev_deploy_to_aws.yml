@@ -8,6 +8,7 @@ on:
 
 jobs:
   Deploy_to_aws: 
+      if: ${{ github.ref == 'refs/heads/dev' }}
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
@@ -23,7 +24,7 @@ jobs:
         - name: Copy Data
           run: |
             echo "Hello"
-            echo contains('Hello world', 'llo')
-            ls -la
-            aws sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
+            echo "Deploying to production server on branch $GITHUB_REF"
+            #ls -la
+            #aws sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
 
