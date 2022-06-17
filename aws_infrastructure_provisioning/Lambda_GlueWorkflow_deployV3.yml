@@ -36,18 +36,12 @@ Parameters:
   PathGlueJobScript:
     Type: String
 
-  ProdDB:
-    Type: String
-  
-  DevDB:
-    Type: String
-
 Mappings: 
   DatabaseNameMap:
     prod: 
-      database: !Ref ProdDB #prod-tweets-db
+      database: prod-tweets-db
     dev:
-      database: !Ref DevDB #dev-tweets-db
+      database: dev-tweets-db
 
 Resources: 
   LambdaExecutionRole:
