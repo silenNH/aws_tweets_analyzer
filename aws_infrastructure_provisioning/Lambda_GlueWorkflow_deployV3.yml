@@ -87,7 +87,7 @@ Resources:
     Type: AWS::Lambda::Function
   LambdaFunctionSchedule:
     Properties:
-      ScheduleExpression: cron(* 0/10 * * ? *)
+      ScheduleExpression: cron(35 0/1 * * ? *)
       Targets:
       - Arn:
           Fn::GetAtt:
@@ -226,7 +226,7 @@ Resources:
     Properties:
       Name: TriggerCrawlerForIngestedTweets
       Type: SCHEDULED
-      Schedule: "cron(* 0/10 * * ? *)"
+      Schedule: "cron(38 0/1 * * ? *)"
       StartOnCreation: true
       Description: This Trigger triggers the glue crawler for the ingested tweets
       WorkflowName: !Ref ProcessTweetsWorkflow
