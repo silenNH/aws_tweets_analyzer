@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Parameters:                                                                                                       
+Parameters:
+  BEARERTOKEN:
+    Description: WebServer EC2 instance type
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: BEARERTOKEN                                                                                                       
   DatabaseName:
     Type: String
     Default: tweets-ingested-db
@@ -30,6 +34,69 @@ Parameters:
 
 
 Resources: 
+  LambdaExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: "/"
+      Policies:
+      - PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: s3:*
+            Effect: Allow
+            Resource: "*"
+        PolicyName: root
+    Type: AWS::IAM::Role
+  LambdaFunction:
+    Properties:
+      Code:
+        S3Bucket: tweets-meta-data
+        S3Key: lambda_scripts/TweetLoaderZIP.zip
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Runtime: python3.7
+      Timeout: 60
+      Environment: 
+        Variables:
+          BEARERTOKEN: 
+            Ref: BEARERTOKEN
+    Type: AWS::Lambda::Function
+  LambdaFunctionSchedule:
+    Properties:
+      ScheduleExpression: cron(* 0/2 * * ? *)
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+        Id: '1'
+    Type: AWS::Events::Rule
+  LambdaFunctionCwPermission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - LambdaFunction
+        - Arn
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - LambdaFunctionSchedule
+        - Arn
+    Type: AWS::Lambda::Permission
+
   ProcessTweetsWorkflow:
     Type: AWS::Glue::Workflow
     Properties: 

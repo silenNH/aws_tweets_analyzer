@@ -10,14 +10,17 @@ from pyspark.sql.types import StringType
 from pyspark.sql.functions import col
 import pyspark.sql.functions as F
 from pyspark.sql.functions import to_timestamp
-
+import boto3
 import datetime
 
 print("Get Entities Script is starting!")
 
-#Set Environment Variables
-bucket='tweets-processed'
-environment='dev'
+#Set current bucket and env from parameter store
+ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
+environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
+bucket=ssm.get_parameter(Name='current_tweets_processed_bucket', WithDecryption=False)['Parameter']['Value']
+
+#Get Argumente for bookmarking
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
 #Create glueContext
@@ -27,7 +30,7 @@ glueContext = GlueContext(SparkContext.getOrCreate())
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-#Ge tweets table
+#Get tweets table
 tweetsddf = glueContext.create_dynamic_frame.from_catalog(database="tweets-ingested-db", table_name="timeline", transformation_ctx = "tweetsddf")
 
 
@@ -63,7 +66,7 @@ try:
     #hashtags_full_df.write.mode('ignore').json(s3_bucket)
     hashtags_full_df.coalesce(1).write.format('json').save(s3_bucket)
 except:
-    raise
+    pass
 
 #ANNOTATIONS: 
 #Generate data frame for annotation and adjust the columns
@@ -82,7 +85,7 @@ try:
     s3_bucket=f's3://{bucket}/{prefix}/'
     annotations_full_df.coalesce(1).write.format('json').save(s3_bucket)
 except:
-    raise
+    pass
 
 #Mentions: 
 #Generate data frame for Mentions and adjust the columns
@@ -101,7 +104,7 @@ try:
     s3_bucket=f's3://{bucket}/{prefix}/'
     mentions_full_df.coalesce(1).write.format('json').save(s3_bucket)
 except:
-    raise
+    pass
 
 #URLS: 
 #Generate data frame for urls and adjust the columns
@@ -126,52 +129,48 @@ try:
     s3_bucket=f's3://{bucket}/{prefix}/'
     urls_full_df.coalesce(1).write.format('json').save(s3_bucket)
 except:
-    raise
+    pass
 
 #Generation of the base file with sentiment
 #Sentiment Analysis with AWS Comprehend 
 # UDF for Sentiment
-try:
-    def get_sentiment(text,lang):
-        # Run sentiment analysis
-        comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
-        if lang =="en":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="en")["Sentiment"]
-            return sentiment_output
-        elif lang =="de":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="de")["Sentiment"]
-            return sentiment_output
-        elif lang =="pl":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="pl")["Sentiment"]
-            return sentiment_output
-        elif lang =="fr":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="fr")["Sentiment"]
-            return sentiment_output
-        elif lang =="es":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="es")["Sentiment"]
-            return sentiment_output
-        elif lang =="es":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="es")["Sentiment"]
-            return sentiment_output
-        elif lang =="ar":
-            sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="ar")["Sentiment"]
-            return sentiment_output
-        else:
-            return "Language not supported"
-    get_sentiment_udf=udf(get_sentiment, StringType()) 
 
-    tweets_sentiment=tweetsddf.toDF()
-    tweets_sentiment=tweets_sentiment.drop("partition_0","partition_1","partition_2","partition_3","partition_4","entities","ingested_at_int")
-    tweets_sentiment=tweets_sentiment.withColumn("sentiment", get_sentiment_udf(F.col("text"),F.col("lang")))
-    tweets_sentiment=tweets_sentiment.withColumn("created_at_new",to_timestamp("created_at"))
-    tweets_sentiment=tweets_sentiment.drop("created_at")
-    #Save the resulting tweets_sentiment with sentiment S3: 
-    entity_type='tweets_sent'
-    prefix=f'{environment}/tweet_entities/{entity_type}/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}/{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'
-    s3_bucket=f's3://{bucket}/{prefix}/'
-    tweets_sentiment.coalesce(1).write.format('json').save(s3_bucket)
-except:
-    raise 
+def get_sentiment(text,lang):
+    # Run sentiment analysis
+    comprehend = boto3.client(service_name='comprehend', region_name='eu-central-1')
+    if lang =="en":
+        sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="en")["Sentiment"]
+        return sentiment_output
+    elif lang =="de":
+        sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="de")["Sentiment"]
+        return sentiment_output
+    elif lang =="fr":
+        sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="fr")["Sentiment"]
+        return sentiment_output
+    elif lang =="es":
+        sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="es")["Sentiment"]
+        return sentiment_output
+    elif lang =="es":
+        sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="es")["Sentiment"]
+        return sentiment_output
+    elif lang =="ar":
+        sentiment_output = comprehend.detect_sentiment(Text=text, LanguageCode="ar")["Sentiment"]
+        return sentiment_output
+    else:
+        return "Language not supported"
+get_sentiment_udf=udf(get_sentiment, StringType())  
+
+tweets_sentiment=tweetsddf.toDF()
+tweets_sentiment=tweets_sentiment.drop("partition_0","partition_1","partition_2","partition_3","partition_4","entities","ingested_at_int")
+tweets_sentiment=tweets_sentiment.withColumn("sentiment", get_sentiment_udf(F.col("text"),F.col("lang")))
+tweets_sentiment=tweets_sentiment.withColumn("created_at_new",to_timestamp("created_at"))
+tweets_sentiment=tweets_sentiment.drop("created_at")
+#Save the resulting tweets_sentiment with sentiment S3: 
+entity_type='tweets_sent'
+prefix=f'{environment}/tweet_entities/{entity_type}/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}/{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'
+s3_bucket=f's3://{bucket}/{prefix}/'
+tweets_sentiment.coalesce(1).write.format('json').save(s3_bucket)
+#tweets_sentiment.write.mode('append').json(s3_bucket)
 
 #Update Bookmark: 
 job.commit()
