@@ -23,5 +23,7 @@ jobs:
         - name: Copy Data
           run: |
             echo "Hello"
+            ${GITHUB_REF##*/}
             ls -la
+            aws sync ./glue_pyspark_job  s3://dev-tweets-source-meta/pyspark_script/
 
