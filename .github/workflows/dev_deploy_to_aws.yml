@@ -8,8 +8,6 @@ jobs:
   automated_test:
     runs-on: ubuntu-latest
     steps:
-      with: 
-        node-version: '12'
       - name: Testscript
         run: |
           echo "Testscripts need to be defined and applied here"
