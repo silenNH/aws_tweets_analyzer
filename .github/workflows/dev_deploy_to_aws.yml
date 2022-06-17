@@ -36,8 +36,8 @@ jobs:
         - name: Set parameters
           run: |
             aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
-            cd user_ids
-            #ls -la
+            #cd user_ids
+            ls -la
             #cat user_ids.txt
             #cd ../
             cat ./user_ids/user_ids.txt
