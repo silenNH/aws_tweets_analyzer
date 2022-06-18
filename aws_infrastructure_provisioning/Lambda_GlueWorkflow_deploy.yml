@@ -115,7 +115,7 @@ Resources:
     Type: AWS::Glue::Workflow
     Properties: 
       Description: The workflows triggers the initial glue crawler for the ingested tweets. After competion a glue job is started to process the tweets. The processed tweets are processed in a glue crawler
-      Name: ProcessTweetsWorkflow2
+      Name: ProcessTweetsWorkflow
 
   RoleProcessingTweets:
     Type: AWS::IAM::Role
@@ -159,7 +159,7 @@ Resources:
   CrawlerIngestedTweets:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: CrawlerIngestedTweets
+      Name: !Join ["-", [!Ref Environmentval , "CrawlerIngestedTweets"]] #old CrawlerIngestedTweets
       Role: !GetAtt RoleProcessingTweets.Arn
       # Just Crawl New Order to limit workload and costs
       RecrawlPolicy: 
@@ -200,14 +200,14 @@ Resources:
       ExecutionProperty:
         MaxConcurrentRuns: 2
       MaxRetries: 0
-      Name: JobProcessingTweets
+      Name: !Join ["-", [!Ref Environmentval , "JobProcessingTweets"]] 
       Role: !Ref RoleProcessingTweets
 
  #Create a crawler to crawl the processed tweets tables in a s3 bucket
   CrawlerProcessedTweetsTables:
     Type: AWS::Glue::Crawler
     Properties:
-      Name: CrawlerProcessedTweetsTables
+      Name: !Join ["-", [!Ref Environmentval , "CrawlerProcessedTweetsTables"]]  
       Role: !GetAtt RoleProcessingTweets.Arn
       # Just Crawl New Order to limit workload and costs
       RecrawlPolicy: 
@@ -229,7 +229,7 @@ Resources:
   TriggerCrawlerForIngestedTweets:
     Type: AWS::Glue::Trigger
     Properties:
-      Name: TriggerCrawlerForIngestedTweets
+      Name: !Join ["-", [!Ref Environmentval , "TriggerCrawlerForIngestedTweets"]] 
       Type: SCHEDULED
       Schedule: "cron(15 0/4 * * ? *)"
       StartOnCreation: true
@@ -241,7 +241,7 @@ Resources:
   TriggerJobForProcessingTweets:
     Type: AWS::Glue::Trigger
     Properties:
-      Name: TriggerJobForProcessingTweets
+      Name: !Join ["-", [!Ref Environmentval , "TriggerJobForProcessingTweets"]] 
       Type: CONDITIONAL
       StartOnCreation: True
       Description: After the Crawler CrawlerIngestedTweets is completed the Glue Job
@@ -260,7 +260,7 @@ Resources:
   TriggerCrawlerForProcessedTweets:
     Type: AWS::Glue::Trigger
     Properties:
-      Name: TriggerCrawlerForProcessedTweets
+      Name: !Join ["-", [!Ref Environmentval , "TriggerCrawlerForProcessedTweets"]]  
       Type: CONDITIONAL
       StartOnCreation: True
       Description: After the Glue Job processed the raw Tweets and processed data in a s3 bucket a Crawler is triggered to crawl the process data and to ceate a Athena table for visualization purposes.
