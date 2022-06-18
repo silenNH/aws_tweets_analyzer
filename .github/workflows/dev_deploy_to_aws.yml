@@ -57,7 +57,8 @@ jobs:
 
 
   prod_deploy_to_aws:
-    if: ${{ github.ref == 'refs/heads/prod' }} 
+    if: ${{ github.ref == 'refs/heads/prod' }}
+    environment: prod 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
