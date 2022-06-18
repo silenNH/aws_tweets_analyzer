@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - dev
+    - prod
 
 jobs:
   automated_test:
