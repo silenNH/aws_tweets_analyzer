@@ -20,7 +20,7 @@ def lambda_handler(event, context):
         bucket_meta_data=ssm.get_parameter(Name='DEV_TWEETS_SOURCE_META', WithDecryption=False)['Parameter']['Value']
     elif environment =="prod":
         bucket=ssm.get_parameter(Name='PROD_TWEETS_DATA', WithDecryption=False)['Parameter']['Value']
-        bucket_meta_data=ssm.get_parameter(Name='PROD_TWEETS_DATA', WithDecryption=False)['Parameter']['Value']
+        bucket_meta_data=ssm.get_parameter(Name='PROD_TWEETS_META_SOURCE', WithDecryption=False)['Parameter']['Value']
     else: 
         raise
     tweet_startdate_default=ssm.get_parameter(Name='TWEET_STARTDATE_DEFAULT', WithDecryption=False)['Parameter']['Value']                            #Example '2022-06-12T08:00:00Z'
