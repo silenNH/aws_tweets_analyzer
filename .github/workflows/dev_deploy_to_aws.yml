@@ -55,7 +55,6 @@ jobs:
           aws ssm put-parameter --name TWEET_STARTDATE_DEFAULT --value ${{ secrets.TWEET_STARTDATE_DEFAULT }}  --type "String" --overwrite
 
 
-
   prod_deploy_to_aws:
     if: ${{ github.ref == 'refs/heads/prod' }}
     environment: prod 
