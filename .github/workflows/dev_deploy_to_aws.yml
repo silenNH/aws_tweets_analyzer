@@ -42,7 +42,6 @@ jobs:
 
       - name: Set parameters for dev environment
         if: ${{ github.ref == 'refs/heads/dev' }}
-        needs: automated_test
         run: |
           aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
           #cd user_ids
@@ -60,6 +59,7 @@ jobs:
 
   prod_configure_aws:
     if: ${{ github.ref == 'refs/heads/prod' }}
+    needs: automated_test
     environment: prod 
     runs-on: ubuntu-latest
     steps:
