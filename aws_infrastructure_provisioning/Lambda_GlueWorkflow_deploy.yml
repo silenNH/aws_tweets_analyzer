@@ -115,7 +115,7 @@ Resources:
     Type: AWS::Glue::Workflow
     Properties: 
       Description: The workflows triggers the initial glue crawler for the ingested tweets. After competion a glue job is started to process the tweets. The processed tweets are processed in a glue crawler
-      Name: ProcessTweetsWorkflow
+      Name: !Join ["-", [!Ref Environmentval , "ProcessTweetsWorkflow"]]  # ProcessTweetsWorkflow
 
   RoleProcessingTweets:
     Type: AWS::IAM::Role
