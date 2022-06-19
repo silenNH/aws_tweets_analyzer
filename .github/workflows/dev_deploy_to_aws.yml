@@ -53,7 +53,6 @@ jobs:
           aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
           aws ssm put-parameter --name DEV_TWEETS_DATA --value ${{ secrets.DEV_TWEETS_DATA }}  --type "String" --overwrite
           aws ssm put-parameter --name DEV_TWEETS_SOURCE_META --value ${{ secrets.DEV_TWEETS_SOURCE_META }}  --type "String" --overwrite
-          aws ssm put-parameter --name CURRENT_ENV --value "dev"  --type "String" --overwrite
           aws ssm put-parameter --name TWEET_STARTDATE_DEFAULT --value ${{ secrets.TWEET_STARTDATE_DEFAULT }}  --type "String" --overwrite
 
 
@@ -100,7 +99,6 @@ jobs:
           aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
           aws ssm put-parameter --name PROD_TWEETS_DATA --value ${{ secrets.PROD_TWEETS_DATA }}  --type "String" --overwrite
           aws ssm put-parameter --name PROD_TWEETS_META_SOURCE --value ${{ secrets.PROD_TWEETS_META_SOURCE }}  --type "String" --overwrite
-          aws ssm put-parameter --name CURRENT_ENV --value "prod"  --type "String" --overwrite
           aws ssm put-parameter --name TWEET_STARTDATE_DEFAULT --value ${{ secrets.TWEET_STARTDATE_DEFAULT }}  --type "String" --overwrite
 
   dev_deploy_cloudformation_template:

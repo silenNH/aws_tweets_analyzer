@@ -22,11 +22,6 @@ bucket=args['bucket']
 environment=args['env']
 
 
-#Set current bucket and env from parameter store
-#ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
-#environment=ssm.get_parameter(Name='current_env', WithDecryption=False)['Parameter']['Value']
-
-
 #Create glueContext
 glueContext = GlueContext(SparkContext.getOrCreate())
 
