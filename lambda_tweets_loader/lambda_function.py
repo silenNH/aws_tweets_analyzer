@@ -8,9 +8,16 @@ import boto3
 
 def lambda_handler(event, context):
     # TODO implement
-    max_results=100 #5 up to 100
-    #Get Environment Variable for production or development environment
-    environment ="dev" #os.environ.get("ENVIRONMENTVAL")
+    
+    #Local development or Cloud usage
+    # If tested locally set variable local to True, if the lambda function is deploy to AWS set the variable local to False
+    local=False 
+    if local:
+        # Set the environment Variable to: 
+        environment ="dev"
+    else: 
+        #Get Environment Variable for production or development environment
+        environment =os.environ.get("ENVIRONMENTVAL")
     #Get access to the AWS Parameter Store
     ssm = boto3.client(service_name='ssm', region_name='eu-central-1')
     
@@ -26,7 +33,7 @@ def lambda_handler(event, context):
     tweet_startdate_default=ssm.get_parameter(Name='TWEET_STARTDATE_DEFAULT', WithDecryption=False)['Parameter']['Value']   #Example '2022-06-12T08:00:00Z'
     user_ids= ssm.get_parameter(Name='UserIDs', WithDecryption=False)['Parameter']['Value']  
     user_ids=user_ids.split(",")
-
+    max_results=100 #5 up to 100
     #Calculate the prefxes and current folder structure
     prefix=f'{environment}/timeline/{datetime.date.today().year}/{datetime.date.today().month}/{datetime.date.today().day}'
     current_folder=f'{datetime.datetime.now().hour}/{datetime.datetime.now().minute}'
