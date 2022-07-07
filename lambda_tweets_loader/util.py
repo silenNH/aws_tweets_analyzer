@@ -123,6 +123,7 @@ def upload_s3(body, bucket, file):
     if file == None:
         raise ValueError("The function upload_s3 expects the input variable file. But none were given")
     
+    
     #Get the S3 Boto client
     s3_client=get_client()
     #Upload file to S3 Bucket
