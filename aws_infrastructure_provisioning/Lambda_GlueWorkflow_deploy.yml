@@ -5,12 +5,7 @@ Parameters:
     Description: WebServer EC2 instance type
     Type: AWS::SSM::Parameter::Value<String>
     Default: BEARERTOKEN                                                                                                       
-  DatabaseName:
-    Type: String
-    Default: tweets-ingested-db
-  TablePrefixName:
-    Type: String
-    Default: rawTweets
+
   Environmentval:
     Type: String
     Default: dev
@@ -150,6 +145,7 @@ Resources:
   DatabaseIngestedTweets:
     Type: AWS::Glue::Database
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
@@ -172,7 +168,6 @@ Resources:
         S3Targets:
           # Private S3 bucket with ingested tweet data
           - Path: !Ref PathIngestCrawler
-      #TablePrefix: !Ref TablePrefixName
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
         DeleteBehavior: "LOG"
@@ -215,7 +210,6 @@ Resources:
         S3Targets:
           # Private S3 bucket with ingested tweet data
           - Path: !Ref PathProcessedTweets 
-      #TablePrefix: !Ref TablePrefixName
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
         DeleteBehavior: "LOG"
