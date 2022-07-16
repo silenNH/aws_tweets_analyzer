@@ -23,10 +23,11 @@ jobs:
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
       
-      - name: Update Python
+      - name: Update Python and install requests
         run: |
           cd $GITHUB_WORKSPACE
           python -m pip install --upgrade pip
+          pip install requests
         
       - name: Run Unit Tests
         run: | 
