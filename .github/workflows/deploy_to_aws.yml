@@ -200,7 +200,6 @@ jobs:
           aws glue create-database --database-input "{\"Name\":\"prod-tweets-db\",\"Description\":\"Glue_Databases_for_ingested_tweets\"}"  
           #--catalog-id $account_id
 
-
   dev_deploy_cloudformation_template:
     if: ${{ github.ref == 'refs/heads/dev' }}
     needs: dev_configure_aws
