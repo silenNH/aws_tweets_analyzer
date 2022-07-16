@@ -4,6 +4,9 @@ on:
     branches:
     - dev
     - prod
+  pull_request:
+    branches:
+    - prod
 
 jobs:
   automated_test:
@@ -134,22 +137,16 @@ jobs:
         run: |
           echo "Hello"
           echo "Copy data to development environment on aws server on branch $GITHUB_REF"
-          ls -la
           aws s3 sync ./glue_pyspark_job  s3://${{ secrets.DEV_TWEETS_SOURCE_META }}/pyspark_script/
           cd lambda_tweets_loader
           zip -r ../TweetLoaderZIP.zip .
           cd ../ 
-          ls -la
           aws s3 cp TweetLoaderZIP.zip s3://${{ secrets.DEV_TWEETS_SOURCE_META }}/lambda-source/
 
       - name: Set parameters for dev environment
         if: ${{ github.ref == 'refs/heads/dev' }}
         run: |
           aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
-          #cd user_ids
-          ls -la
-          #cat user_ids.txt
-          #cd ../
           cat ./user_ids/user_ids.txt
           user_ids=`cat ./user_ids/user_ids.txt`
           aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
@@ -177,24 +174,17 @@ jobs:
       - name: Copy Data into prod environment
         if: ${{ github.ref == 'refs/heads/prod' }}
         run: |
-          echo "Hello"
           echo "Copy data to development environment on aws server on branch $GITHUB_REF"
-          ls -la
           aws s3 sync ./glue_pyspark_job  s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/pyspark_script/
           cd lambda_tweets_loader
           zip -r ../TweetLoaderZIP.zip .
           cd ../ 
-          ls -la
           aws s3 cp TweetLoaderZIP.zip s3://${{ secrets.PROD_TWEETS_META_SOURCE }}/lambda-source/
 
       - name: Set parameters for prod environment
         if: ${{ github.ref == 'refs/heads/prod' }}
         run: |
           aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
-          #cd user_ids
-          ls -la
-          #cat user_ids.txt
-          #cd ../
           cat ./user_ids/user_ids.txt
           user_ids=`cat ./user_ids/user_ids.txt`
           aws ssm put-parameter --name UserIDs --value $user_ids  --type "String" --overwrite
