@@ -142,15 +142,19 @@ Resources:
                 Action: "*"
                 Resource: "*"
  # Create a database to contain tables created by the crawler
-  DatabaseIngestedTweets:
-    Type: AWS::Glue::Database
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      CatalogId: !Ref AWS::AccountId
-      DatabaseInput:
-        Name: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
-        Description: "Glue Databases for ingested tweets"
+ # Glue Database is created during the AWS configuration step in GitHub Actions since the retaining policy of the database caused sever problems and  couldnt be imported as existing resource in the CloudFormation stack (not available here: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resource-import-supported-resources.html)
+
+  #DatabaseIngestedTweets:
+  #  Type: AWS::Glue::Database
+  #  DeletionPolicy: Retain
+  #  UpdateReplacePolicy: Retain
+  #  Properties:
+  #    CatalogId: !Ref AWS::AccountId
+  #    DatabaseInput:
+  #      Name: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
+  #      Description: "Glue Databases for ingested tweets"
+ 
+
  #Create a crawler to crawl the tweets data in a s3 bucket
   CrawlerIngestedTweets:
     Type: AWS::Glue::Crawler

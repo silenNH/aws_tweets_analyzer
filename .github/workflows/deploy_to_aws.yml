@@ -197,7 +197,7 @@ jobs:
         run: |
           aws sts get-caller-identity --query "Account"
           account_id=$?
-          aws glue create-database --database-input "{\"Name\":\"tempdb3\",\"Description\":\"This_is_a_description\"}"  
+          aws glue create-database --database-input "{\"Name\":\"prod-tweets-db\",\"Description\":\"Glue_Databases_for_ingested_tweets\"}"  
           #--catalog-id $account_id
 
 
