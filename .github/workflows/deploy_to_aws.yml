@@ -8,12 +8,29 @@ on:
 jobs:
   automated_test:
     runs-on: ubuntu-latest
+    strategy:
+      python-version: [3.7]
     steps:
-      - uses: actions/checkout@v2
-      - name: Testscript
-        run: |
-          echo "Testscripts need to be defined and applied here"
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
+      - name: Set Up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      
+      - name: Update Python
+        run: |
+          cd $GITHUB_WORKSPACE
+          python -m pip install --upgrade pip
+        
+      - name: Run Unit Tests
+          run: | 
+            python -m unittest test_unittest.py
+            echo "unittest is finished"
 
       - name: Setup Cloud Formation Linter
         uses: scottbrenner/cfn-lint-action@v2
