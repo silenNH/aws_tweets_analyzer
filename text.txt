@@ -1,4 +1,0 @@
-aws ssm put parameter:  
-aws ssm put-parameter --name current_env --value "dev"  --type "String" --overwrite
-
-j

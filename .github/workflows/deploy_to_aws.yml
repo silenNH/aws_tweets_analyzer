@@ -135,7 +135,6 @@ jobs:
       - name: Copy Data into dev environment
         if: ${{ github.ref == 'refs/heads/dev' }}
         run: |
-          echo "Hello"
           echo "Copy data to development environment on aws server on branch $GITHUB_REF"
           aws s3 sync ./glue_pyspark_job  s3://${{ secrets.DEV_TWEETS_SOURCE_META }}/pyspark_script/
           cd lambda_tweets_loader
@@ -153,6 +152,12 @@ jobs:
           aws ssm put-parameter --name DEV_TWEETS_DATA --value ${{ secrets.DEV_TWEETS_DATA }}  --type "String" --overwrite
           aws ssm put-parameter --name DEV_TWEETS_SOURCE_META --value ${{ secrets.DEV_TWEETS_SOURCE_META }}  --type "String" --overwrite
           aws ssm put-parameter --name TWEET_STARTDATE_DEFAULT --value ${{ secrets.TWEET_STARTDATE_DEFAULT }}  --type "String" --overwrite
+      
+      - name: Create Glue Database if not exists
+        run: |
+          aws sts get-caller-identity --query "Account"
+          account_id=$?
+          aws glue create-database --database-input '"{\"Name\":\"tempdb3\",\"Description\":\"This_is_a_description\"}"'  --catalog-id $account_id
 
   prod_configure_aws:
     if: ${{ github.ref == 'refs/heads/prod' }}
