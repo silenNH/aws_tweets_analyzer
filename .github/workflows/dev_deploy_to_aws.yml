@@ -9,6 +9,7 @@ jobs:
   automated_test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Testscript
         run: |
           echo "Testscripts need to be defined and applied here"
