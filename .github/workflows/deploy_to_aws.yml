@@ -43,6 +43,68 @@ jobs:
           script: |
             core.setFailed('Secret DEV_TWEETS_DATA is empty')
 
+      - name: Negative Check Parameter AWS_ACCESS_KEY_ID exists
+        env:
+          MY_Secret: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret AWS_ACCESS_KEY_ID is empty')
+
+      - name: Negative Check Parameter AWS_SECRET_ACCESS_KEY exists
+        env:
+          MY_Secret: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret AWS_SECRET_ACCESS_KEY is empty')
+
+      - name: Negative Check Parameter BEARERTOKEN exists
+        env:
+          MY_Secret: ${{ secrets.BEARERTOKEN }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret BEARERTOKEN is empty')
+
+      - name: Negative Check Parameter DEV_TWEETS_SOURCE_META exists
+        env:
+          MY_Secret: ${{ secrets.DEV_TWEETS_SOURCE_META }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret DEV_TWEETS_SOURCE_META is empty')
+
+      - name: Negative Check Parameter PROD_TWEETS_DATA exists
+        env:
+          MY_Secret: ${{ secrets.PROD_TWEETS_DATA }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret PROD_TWEETS_DATA is empty')
+
+      - name: Negative Check Parameter PROD_TWEETS_META_SOURCE exists
+        env:
+          MY_Secret: ${{ secrets.PROD_TWEETS_META_SOURCE }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret PROD_TWEETS_META_SOURCE is empty')
+
+      - name: Negative Check Parameter TWEET_STARTDATE_DEFAULT exists
+        env:
+          MY_Secret: ${{ secrets.TWEET_STARTDATE_DEFAULT }}
+        if: "${{ env.MY_Secret == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Secret TWEET_STARTDATE_DEFAULT is empty')
 
       - name: Setup Cloud Formation Linter
         uses: scottbrenner/cfn-lint-action@v2
