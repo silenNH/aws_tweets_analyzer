@@ -13,15 +13,15 @@ jobs:
       - name: Testscript
         run: |
           echo "Testscripts need to be defined and applied here"
-          ls -la
 
-      #- name: Setup Cloud Formation Linter
-      #  uses: scottbrenner/cfn-lint-action@v2
+
+      - name: Setup Cloud Formation Linter
+        uses: scottbrenner/cfn-lint-action@v2
       
-      #- name: Run the CloudFormation Template Tester (Linter)
-      #  run: |
-      #    cfn-lint --version
-      #    cfn-lint -t aws_infrastructure_provisioning/Lambda_GlueWorkflow_deploy.yml
+      - name: Run the CloudFormation Template Tester (Linter)
+        run: |
+          cfn-lint --version
+          cfn-lint -t aws_infrastructure_provisioning/Lambda_GlueWorkflow_deploy.yml
 
   dev_configure_aws:
     if: ${{ github.ref == 'refs/heads/dev' }} 
