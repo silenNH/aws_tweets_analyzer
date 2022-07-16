@@ -185,8 +185,6 @@ Resources:
       GlueVersion: 2.0
       NumberOfWorkers: 2
       Timeout: 10
-      ExecutionProperty:
-        MaxConcurrentRuns: 1
       WorkerType: "Standard"
       Command:
         Name: glueetl
@@ -197,9 +195,6 @@ Resources:
         "--DataBase1": !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
         "--bucket": !Ref DataBucket
         "--env": !Ref Environmentval
-      ExecutionProperty:
-        MaxConcurrentRuns: 2
-      MaxRetries: 0
       Name: !Join ["-", [!Ref Environmentval , "JobProcessingTweets"]] 
       Role: !Ref RoleProcessingTweets
 
