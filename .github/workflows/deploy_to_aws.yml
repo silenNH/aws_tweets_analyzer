@@ -197,7 +197,8 @@ jobs:
         run: |
           aws sts get-caller-identity --query "Account"
           account_id=$?
-          aws glue create-database --database-input "{\"Name\":\"tempdb3\",\"Description\":\"This_is_a_description\"}"  --catalog-id $account_id
+          aws glue create-database --database-input "{\"Name\":\"tempdb3\",\"Description\":\"This_is_a_description\"}"  
+          #--catalog-id $account_id
 
   dev_deploy_cloudformation_template:
     if: ${{ github.ref == 'refs/heads/dev' }}
