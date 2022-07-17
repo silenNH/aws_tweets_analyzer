@@ -153,7 +153,6 @@ jobs:
           aws ssm put-parameter --name DEV_TWEETS_SOURCE_META --value ${{ secrets.DEV_TWEETS_SOURCE_META }}  --type "String" --overwrite
           aws ssm put-parameter --name TWEET_STARTDATE_DEFAULT --value ${{ secrets.TWEET_STARTDATE_DEFAULT }}  --type "String" --overwrite
       
-
   prod_configure_aws:
     if: ${{ github.ref == 'refs/heads/prod' }}
     needs: automated_test
