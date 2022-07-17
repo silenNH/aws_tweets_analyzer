@@ -21,7 +21,6 @@ database_env=args['DataBase1']
 bucket=args['bucket']
 environment=args['env']
 
-
 #Create glueContext
 glueContext = GlueContext(SparkContext.getOrCreate())
 
@@ -34,7 +33,6 @@ table_name=environment + "_timeline"
 
 #Get tweets table
 tweetsddf = glueContext.create_dynamic_frame.from_catalog(database=database_env, table_name=table_name, transformation_ctx = "tweetsddf")
-
 
 #Relationize the table tweets
 tweets_relationized=tweetsddf.relationalize("root", "s3://glue-pyspakk-test/rel_folder_for_tweets/")
