@@ -74,7 +74,7 @@ Resources:
         - LambdaExecutionRole
         - Arn
       Runtime: python3.7
-      Timeout: 60
+      Timeout: 180
       Environment: 
         Variables:
           BEARERTOKEN: 
