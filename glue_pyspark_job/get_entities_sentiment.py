@@ -30,7 +30,7 @@ job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
 #Get Table Name
-table_name=environment + "-timeline"
+table_name=environment + "_timeline"
 
 #Get tweets table
 tweetsddf = glueContext.create_dynamic_frame.from_catalog(database=database_env, table_name=table_name, transformation_ctx = "tweetsddf")

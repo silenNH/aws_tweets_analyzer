@@ -169,7 +169,7 @@ Resources:
       Description: AWS Glue crawler to crawl ingested tweets
       #Schedule: none, use default run-on-demand
       DatabaseName: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
-      TablePrefix: !Join ["-", [!Ref Environmentval , ""]]
+      TablePrefix: !Join ["_", [!Ref Environmentval , ""]]
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data
@@ -212,7 +212,7 @@ Resources:
       Description: AWS Glue crawler to crawl processed tweets tables
       #Schedule: none, use default run-on-demand
       DatabaseName: !FindInMap [DatabaseNameMap, !Ref Environmentval, database]
-      TablePrefix: !Join ["-", [!Ref Environmentval , ""]]
+      TablePrefix: !Join ["_", [!Ref Environmentval , ""]]
       Targets:
         S3Targets:
           # Private S3 bucket with ingested tweet data

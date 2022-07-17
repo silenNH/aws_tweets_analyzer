@@ -2,7 +2,7 @@ import unittest
 from lambda_tweets_loader.getTimelineUtil import create_url
 
 
-class TestEmployee(unittest.TestCase):
+class TestLambda(unittest.TestCase):
 
     def test_create_url(self):
         print('test create_url')
