@@ -69,8 +69,15 @@ The initial workflow for deploying the production environment looks like:
 
 ![](miscellaneous/img/InnovationPipeline_GitHubActions%20WorkflowForProduction.png "Innovation Pipeline - GitHub Actions Workflow for production")
 
+The Workflow can be seen under the tab Actions in your GitHub Repository. 
 
 The DataOps architecture is descrivbed in detail in the following:  
+
+# Clean Up
+
+To stop all AWS Services the stack (either 'prod' or 'dev' or both) needs to be deleted. Visit the AWS Webpage and go to the service CloudFormation to see all running stacks. 
+Chosse the running stack you want to delete and press the delete button. 
+The databases are not generated via the CloudFormation template. Thus, these databases needs to be removed manually. Go to the Glue service. Under the tab Data Catalog --> Databases are allo Glue databases listed. Delete the corresponding database. With the deletion of the database all coresponding tables are deleted as well. 
 
 # DataOps Architecture
 
