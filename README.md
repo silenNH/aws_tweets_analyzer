@@ -19,10 +19,7 @@ To deploy the aws_tweets_analyzer a AWS user  as well as access rights to the Tw
 
 ## GitHub Preparation 
 
-### Clone Repository
-~~~
-git clone git@github.com:silenNH/aws_tweets_analyzer.git
-~~~
+
 ### Set Parameters 
 The Parameter can be set in the GitHub Repository (Settings --> Secrets --> Actions --> New repository secrets) 
 
@@ -36,7 +33,45 @@ The following Parameter are needed:
 * DEV_TWEETS_SOURCE_META (The path to the S3 bucket to store the meta data for the development environment in, e.g. s3://dev-tweets-source-meta/)
 * PROD_TWEETS_DATA (The path to the S3 bucket to store the meta data for the production environment in, e.g. s3://prod-tweets-data/)
 * PROD_TWEETS_META_SOURCE (The path to the S3 bucket to store the meta data for the production environment in, e.g. s3://prod-tweets-source-meta/)
-* TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-06-12T08:00:00Z)
+* TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-07-20T08:00:00Z)
+
+## Adjust the list of tracked Twitter Profiles 
+ The list of Twitter user to be tracked are specified in the user_ids.txt file in the folder user_ids. 
+
+ Example:
+ ~~~
+1233052817390284800,851431642950402048,40129171,332617373,1701930446,37065910,998503348369272832,2541212474,2767778093,281766494,2215783724,1080799090538172416,714051110
+ ~~~ 
+ The values are comma separated. Please be aware that spaces are not allowed. 
+
+
+# First Run 
+
+## Clone Repository
+~~~
+git clone git@github.com:silenNH/aws_tweets_analyzer.git
+~~~
+
+## Start Production Environment
+
+A GitHub Actions Workflow deploy fully automated the value pipeline/ the production environment either when a no commit is pushed on the prod branch to the GitHub repository or when a pull request is sent to merge the dev branch to the prod branch. 
+To start initially the production environment a simple push is sufficient: 
+
+~~~
+#Your on the branch 'prod'
+git add -A
+git commit -m"YourText"
+git push
+~~~
+
+## Innitial GitHub Actions Workflow 
+The initial workflow for deploying the production environment looks like: 
+
+![](miscellaneous/img/InnovationPipeline_GitHubActions%20WorkflowForProduction.png "Innovation Pipeline - GitHub Actions Workflow for production")
+
+
+The DataOps architecture is descrivbed in detail in the following:  
+
 # DataOps Architecture
 
 Bergh proposed in the book “The DataOps Cookbook – Methodologies and tools that reduces analytics cycle time while improving quality” an DataOps data architecture. The core idea of this architecture is focus on how to deploy code in data analytics and data science projects to production with low cycle time, high data quality and low downtime risks. From a high level perspective Bergh proposed “decouples operations from new analytics creation and rejoins them under the automated framework of continuous delivery” (Bergh et al., 2019). This decoupling happens through the separation of work in two pipelines: Value pipeline and innovation pipeline (see figure below).
@@ -204,3 +239,18 @@ git branch -d dev
 
 
 # Error Handling
+
+## Timeout of Lambda function
+The Lambda function is timed out when the fetching of Tweets from the Twitter API takes longer than 300 seconds. If a time out occur there are three possible solution: 
+* Increase the Timeout to up to 900 seconds
+* If the error occur on the initial deployment choose a TWEET_STARTDATE_DEFAULT which is more recently to reduce the load time
+* Reduce the number of number of users to track 
+900 seconds is sufficient to load a big volume of Tweets
+
+## The Glue Tables are messes up 
+
+The normal Glue table schould look like: 
+![](miscellaneous/img/Overview_Tables_Glue.png "Normal Tables in AWS GLUE Database")
+If there are tables for single files an error occured. This error can occur when e.g., the data schema schanged from one load to the next load. 
+Best solution is to delete the folder with the Tweets Data, the Meta data folder with the bookamrks as well as the whole Glue Database and start from scratch. 
+
