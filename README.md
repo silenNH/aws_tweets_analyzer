@@ -11,7 +11,6 @@ To deploy the aws_tweets_analyzer a AWS user  as well as access rights to the Tw
 * Retrieve the AWS Access tokesns: Access key and Access Secret Key 
 * Create an IAM user with sufficient rights (e.g. AdministratorAccess) [LINK](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
   
-  
 ### Twitter API v2
 * Apply for the access to the Twitter API (Essential Access) [Link](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
 * For the Elevated access an additional application is required within the developer portal
