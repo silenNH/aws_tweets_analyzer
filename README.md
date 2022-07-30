@@ -18,7 +18,6 @@ To deploy the aws_tweets_analyzer a AWS user  as well as access rights to the Tw
 
 ## GitHub Preparation 
 
-
 ### Set Parameters 
 The Parameter can be set in the GitHub Repository (Settings --> Secrets --> Actions --> New repository secrets) 
 
