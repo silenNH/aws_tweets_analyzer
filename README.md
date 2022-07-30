@@ -29,10 +29,10 @@ The following Parameter are needed:
 * AWS_ACCESS_KEY_ID (AWS Access Key)
 * AWS_SECRET_ACCESS_KEY (AWS Access Secret Key)
 * BEARERTOKEN (Twitter Bearer Token)
-* DEV_TWEETS_DATA (The path to the S3 bucket to store the Tweets data for the development environment in, e.g. s3://dev-tweets-data)
-* DEV_TWEETS_SOURCE_META (The path to the S3 bucket to store the meta data for the development environment in, e.g. s3://dev-tweets-source-meta)
-* PROD_TWEETS_DATA (The path to the S3 bucket to store the meta data for the production environment in, e.g. s3://prod-tweets-data)
-* PROD_TWEETS_META_SOURCE (The path to the S3 bucket to store the meta data for the production environment in, e.g. s3://prod-tweets-source-meta)
+* DEV_TWEETS_DATA (The path to the S3 bucket to store the Tweets data for the development environment in, e.g. dev-tweets-data - Just the name of the Bucket without s3://)
+* DEV_TWEETS_SOURCE_META (The path to the S3 bucket to store the meta data for the development environment in, e.g. dev-tweets-source-meta - Just the name of the Bucket without s3://)
+* PROD_TWEETS_DATA (The path to the S3 bucket to store the meta data for the production environment in, e.g. prod-tweets-data - Just the name of the Bucket without s3://)
+* PROD_TWEETS_META_SOURCE (The path to the S3 bucket to store the meta data for the production environment in, e.g. prod-tweets-source-meta - Just the name of the Bucket without s3://)
 * TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-07-10T08:00:00Z)
 
 ## Adjust the list of tracked Twitter Profiles 
