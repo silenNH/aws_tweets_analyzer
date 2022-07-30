@@ -177,7 +177,8 @@ Resources:
       SchemaChangePolicy:
         UpdateBehavior: "LOG" # Updated to LOG since RecrawPolicy required it --> "UPDATE_IN_DATABASE"
         DeleteBehavior: "LOG"
-      Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
+      #Configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}"
+      Configuration: "{\"Version\":1.0,\"Grouping\":{\"TableGroupingPolicy\":\"CombineCompatibleSchemas\"}}"
 
   JobProcessingTweets:
     Type: AWS::Glue::Job
@@ -185,7 +186,7 @@ Resources:
       MaxRetries: 0
       GlueVersion: 2.0
       NumberOfWorkers: 2
-      Timeout: 10
+      Timeout: 20
       WorkerType: "Standard"
       Command:
         Name: glueetl
