@@ -31,7 +31,7 @@ The following Parameter are needed:
 * DEV_TWEETS_SOURCE_META (The path to the S3 bucket to store the meta data for the development environment in, e.g. dev-tweets-source-meta - Just the name of the Bucket without s3://)
 * PROD_TWEETS_DATA (The path to the S3 bucket to store the meta data for the production environment in, e.g. prod-tweets-data - Just the name of the Bucket without s3://)
 * PROD_TWEETS_META_SOURCE (The path to the S3 bucket to store the meta data for the production environment in, e.g. prod-tweets-source-meta - Just the name of the Bucket without s3://)
-* TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-07-10T08:00:00Z)
+* TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-07-10T08:00:00Z')
 
 ## Adjust the list of tracked Twitter Profiles 
  The list of Twitter user to be tracked are specified in the user_ids.txt file in the folder user_ids. 
