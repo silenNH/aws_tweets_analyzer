@@ -23,6 +23,7 @@ The Parameter can be set in the GitHub Repository (Settings --> Secrets --> Acti
 
 ![ParameterSetting](./miscellaneous/img/StoreParameterGitHubSecrets.png "Parameter Settings")
 
+
 The following Parameter are needed: 
 * AWS_ACCESS_KEY_ID (AWS Access Key)
 * AWS_SECRET_ACCESS_KEY (AWS Access Secret Key)
