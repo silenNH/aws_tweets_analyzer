@@ -11,14 +11,12 @@ To deploy the aws_tweets_analyzer a AWS user  as well as access rights to the Tw
 * Retrieve the AWS Access tokesns: Access key and Access Secret Key 
 * Create an IAM user with sufficient rights (e.g. AdministratorAccess) [LINK](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
   
-  
 ### Twitter API v2
 * Apply for the access to the Twitter API (Essential Access) [Link](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api)
 * For the Elevated access an additional application is required within the developer portal
 * Get the BEARER Token [Link](https://developer.twitter.com/en/docs/authentication/oauth-2-0/bearer-tokens)
 
 ## GitHub Preparation 
-
 
 ### Set Parameters 
 The Parameter can be set in the GitHub Repository (Settings --> Secrets --> Actions --> New repository secrets) 
@@ -29,11 +27,11 @@ The following Parameter are needed:
 * AWS_ACCESS_KEY_ID (AWS Access Key)
 * AWS_SECRET_ACCESS_KEY (AWS Access Secret Key)
 * BEARERTOKEN (Twitter Bearer Token)
-* DEV_TWEETS_DATA (The path to the S3 bucket to store the Tweets data for the development environment in, e.g. s3://dev-tweets-data/)
-* DEV_TWEETS_SOURCE_META (The path to the S3 bucket to store the meta data for the development environment in, e.g. s3://dev-tweets-source-meta/)
-* PROD_TWEETS_DATA (The path to the S3 bucket to store the meta data for the production environment in, e.g. s3://prod-tweets-data/)
-* PROD_TWEETS_META_SOURCE (The path to the S3 bucket to store the meta data for the production environment in, e.g. s3://prod-tweets-source-meta/)
-* TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-07-20T08:00:00Z)
+* DEV_TWEETS_DATA (The path to the S3 bucket to store the Tweets data for the development environment in, e.g. dev-tweets-data - Just the name of the Bucket without s3://)
+* DEV_TWEETS_SOURCE_META (The path to the S3 bucket to store the meta data for the development environment in, e.g. dev-tweets-source-meta - Just the name of the Bucket without s3://)
+* PROD_TWEETS_DATA (The path to the S3 bucket to store the meta data for the production environment in, e.g. prod-tweets-data - Just the name of the Bucket without s3://)
+* PROD_TWEETS_META_SOURCE (The path to the S3 bucket to store the meta data for the production environment in, e.g. prod-tweets-source-meta - Just the name of the Bucket without s3://)
+* TWEET_STARTDATE_DEFAULT (Default date from when the Tweets of the timeline are retrieved: #Example '2022-07-10T08:00:00Z')
 
 ## Adjust the list of tracked Twitter Profiles 
  The list of Twitter user to be tracked are specified in the user_ids.txt file in the folder user_ids. 
@@ -47,9 +45,14 @@ The following Parameter are needed:
 
 # First Run 
 
-## Clone Repository
+## Fork & Clone Repository
+
+Fork the repository to copy the repository into your account: 
+If you dont know how to do it use this manual: [Link](https://docs.github.com/en/get-started/quickstart/fork-a-repo) 
+
+After the repository is forked please clone the Repository to get started. (Atention: Plase enter YOUR-USERNAME)
 ~~~
-git clone git@github.com:silenNH/aws_tweets_analyzer.git
+git clone git@github.com:YOUR-USERNAME/aws_tweets_analyzer.git
 ~~~
 
 ## Start Production Environment
