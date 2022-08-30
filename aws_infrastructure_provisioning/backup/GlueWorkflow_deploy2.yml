@@ -74,6 +74,7 @@ Resources:
         Name: !Ref DatabaseName
         Description: "Glue Databases for ingested tweets"
  #Create a crawler to crawl the tweets data in a s3 bucket
+  
   CrawlerIngestedTweets:
     Type: AWS::Glue::Crawler
     Properties:
