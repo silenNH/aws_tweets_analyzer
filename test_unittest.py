@@ -1,7 +1,6 @@
 import unittest
 from lambda_tweets_loader.getTimelineUtil import create_url
 
-
 class TestLambda(unittest.TestCase):
 
     def test_create_url(self):
